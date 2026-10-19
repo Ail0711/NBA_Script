@@ -51,28 +51,44 @@ if df is not None:
   col1, col2 = st.columns(2)
 
   with col1:
-    st.subheader("Equipo Local")
-    equipo_local = st.selectbox("Selecciona local", equipos, index=0, key="loc")
-    id_loc = df[df["TEAM_NAME"] == equipo_local]["TEAM_ID"].values[0]
-    st.image(
-        f"https://cdn.nba.com/logos/nba/{id_loc}/global/L/logo.svg", width=80
-    )
-    b2b_local = st.checkbox("¿Local en Back-to-Back (B2B)?", key="b2b_l")
+    with st.container(border=True):
+      st.markdown("### 🏠 Equipo Local")
+
+      # Mostrar el escudo centrado arriba del selector
+      equipo_local = st.selectbox(
+          "Selecciona local", equipos, index=0, key="loc"
+      )
+      id_loc = df[df["TEAM_NAME"] == equipo_local]["TEAM_ID"].values[0]
+
+      c_dummy1, c_img_loc, c_dummy2 = st.columns([1, 2, 1])
+      with c_img_loc:
+        st.image(
+            f"https://cdn.nba.com/logos/nba/{id_loc}/global/L/logo.svg",
+            width=100,
+        )
+
+      b2b_local = st.checkbox("¿Local en Back-to-Back (B2B)?", key="b2b_l")
 
   with col2:
-    st.subheader("Equipo Visitante")
-    equipo_vis = st.selectbox(
-        "Selecciona visitante",
-        equipos,
-        index=min(1, len(equipos) - 1),
-        key="vis",
-    )
-    id_vis = df[df["TEAM_NAME"] == equipo_vis]["TEAM_ID"].values[0]
-    st.image(
-        f"https://cdn.nba.com/logos/nba/{id_vis}/global/L/logo.svg", width=80
-    )
-    b2b_vis = st.checkbox("¿Visitante en Back-to-Back (B2B)?", key="b2b_v")
+    with st.container(border=True):
+      st.markdown("### ✈️ Equipo Visitante")
 
+      equipo_vis = st.selectbox(
+          "Selecciona visitante",
+          equipos,
+          index=min(1, len(equipos) - 1),
+          key="vis",
+      )
+      id_vis = df[df["TEAM_NAME"] == equipo_vis]["TEAM_ID"].values[0]
+
+      c_dummy3, c_img_vis, c_dummy4 = st.columns([1, 2, 1])
+      with c_img_vis:
+        st.image(
+            f"https://cdn.nba.com/logos/nba/{id_vis}/global/L/logo.svg",
+            width=100,
+        )
+
+      b2b_vis = st.checkbox("¿Visitante en Back-to-Back (B2B)?", key="b2b_v")
   st.markdown("---")
 
   # --- SECCIÓN DE LÍNEAS DEL CASINO ---
