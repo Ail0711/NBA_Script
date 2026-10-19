@@ -5,13 +5,13 @@ import streamlit as st
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Modelo NBA +EV", page_icon="🏀", layout="centered"
+    page_title="Modelo NBA +EV Pro", page_icon="🏀", layout="centered"
 )
 
 st.title("🏀 Simulador y Modelo Predictivo NBA (+EV)")
 st.write(
-    "Herramienta cuantitativa para comparar proyecciones contra las líneas del"
-    " casino."
+    "Herramienta cuantitativa avanzada para calcular valor, margen y líneas de"
+    " apuestas."
 )
 
 
@@ -80,7 +80,7 @@ if df is not None:
   col_c1, col_c2 = st.columns(2)
   with col_c1:
     linea_spread_casino = st.number_input(
-        f"Spread de {equipo_local} (Ej: -4.5 o +2.5)",
+        f"Spread del Local ({equipo_local}) (Ej: -4.5 o +2.5)",
         value=-3.0,
         step=0.5,
         format="%.1f",
@@ -95,7 +95,7 @@ if df is not None:
 
   st.markdown("---")
 
-  if st.button("Calcular y Buscar Valor (+EV)", type="primary"):
+  if st.button("Calcular y Analizar Margen (+EV)", type="primary"):
     loc = df[df["TEAM_NAME"] == equipo_local]
     vis = df[df["TEAM_NAME"] == equipo_vis]
 
@@ -127,10 +127,11 @@ if df is not None:
     pts_vis -= ventaja_localia / 2
 
     total_proyectado = pts_loc + pts_vis
-    # Spread del modelo desde la perspectiva del local (positivo si el modelo ve favorito al local)
-    spread_modelo_loc = pts_loc - pts_vis
+    spread_modelo_loc = (
+        pts_loc - pts_vis
+    )  # Positivo si el local gana por el modelo
 
-    st.subheader("📊 Resultados de la Proyección y Comparación")
+    st.subheader("📊 Resultados de la Proyección")
 
     m1, m2, m3 = st.columns(3)
     m1.metric(label=f"Pts {equipo_local}", value=f"{pts_loc:.2f}")
@@ -139,61 +140,66 @@ if df is not None:
 
     st.info(f"⚡ **Ritmo Estimado (Pace):** {pace_esperado:.2f} posesiones")
 
-    # --- ANÁLISIS DE VALOR (EDGE) ---
-    st.markdown("### 🎯 Análisis de Valor contra el Casino")
+    # --- ANÁLISIS DE VALOR Y MARGEN (ESTILO TÉCNICO) ---
+    st.markdown("### 🎯 Auditoría y Margen de Valor (+EV)")
 
-    # Comparación de Spread: El modelo arroja qué tanto gana el local.
-    # Si spread_modelo_loc es +5.0, el modelo cree que gana por 5.
-    diferencia_spread = spread_modelo_loc - (-linea_spread_casino)
+    # Margen para el Spread
+    # Diferencia entre lo que proyecta el modelo para el local y lo que pide el casino
+    margen_spread = spread_modelo_loc - linea_spread_casino
 
-    st.write(
-        f"• **Hándicap del Modelo:** {equipo_local} por"
-        f" {spread_modelo_loc:+.2f} pts"
-    )
-    st.write(
-        f"• **Hándicap del Casino:** {equipo_local} con línea en"
-        f" {linea_spread_casino:+.1f} pts"
-    )
+    st.markdown(f"**1. Análisis de Hándicap (Spread):**")
+    st.write(f"- Hándicap estimado por el modelo: **{spread_modelo_loc:+.2f}**")
+    st.write(f"- Hándicap fijado por el casino: **{linea_spread_casino:+.1f}**")
+    st.write(f"- **Margen de Desviación (Edge):** `{margen_spread:+.2f} puntos`")
 
-    # Lógica de recomendación simple basada en la diferencia
-    if abs(diferencia_spread) >= 2.0:
-      if diferencia_spread > 0:
+    if abs(margen_spread) >= 2.0:
+      if margen_spread > 0:
         st.success(
-            f"✅ **¡ALERTA DE VALOR (+EV)!** El modelo ve una diferencia de"
-            f" {diferencia_spread:.2f} puntos a favor de **{equipo_local}**"
-            " respecto a la línea del casino. Podría haber una gran jugada"
-            " aquí."
+            f"✅ **VALOR DETECTADO:** El modelo considera que la línea del casino"
+            f" está sobre corrigiendo o subestimando al local. Tienes un margen"
+            f" favorable de **+{margen_spread:.2f} pts** para ir con"
+            f" **{equipo_local}**."
         )
       else:
         st.success(
-            f"✅ **¡ALERTA DE VALOR (+EV)!** El modelo considera que la línea"
-            f" del casino está desinflada para el visitante (**{equipo_vis}**)."
-            f" Diferencia detectada: {abs(diferencia_spread):.2f} puntos."
+            f"✅ **VALOR DETECTADO:** El modelo encuentra una ventaja clara del"
+            f" lado visitante o tomando los puntos con el rival. Margen de"
+            f" desviación: **{abs(margen_spread):.2f} pts**."
         )
     else:
       st.warning(
-          "⚠️ **Sin valor claro:** La diferencia entre el modelo y la línea del"
-          " casino es menor a 2 puntos. El mercado está muy bien medido;"
-          " mejor pasar de este partido."
+          "⚠️ **Sin margen suficiente:** La diferencia con la línea del casino"
+          " es menor a 2 puntos. El mercado es eficiente en este encuentro."
       )
 
-    # Comparación de Totales (Over/Under)
-    diferencia_total = total_proyectado - linea_total_casino
-    if abs(diferencia_total) >= 3.0:
-      if diferencia_total > 0:
+    st.markdown("---")
+
+    # Margen para el Totales (Over/Under)
+    margen_total = total_proyectado - linea_total_casino
+
+    st.markdown(f"**2. Análisis de Puntuación Total (Over / Under):**")
+    st.write(f"- Total proyectado por el modelo: **{total_proyectado:.2f}**")
+    st.write(f"- Línea Over/Under del casino: **{linea_total_casino:.1f}**")
+    st.write(f"- **Margen de Desviación (Edge):** `{margen_total:+.2f} puntos`")
+
+    if abs(margen_total) >= 3.0:
+      if margen_total > 0:
         st.info(
-            f"📈 **Tendencia Over (Altas):** El modelo proyecta"
-            f" {total_proyectado:.2f} puntos frente a los"
-            f" {linea_total_casino:.1f} del casino (+{diferencia_total:.2f}"
-            " pts de margen)."
+            f"📈 **Oportunidad en Over (Altas):** El modelo proyecta un partido"
+            f" más dinámico con un margen de **+{margen_total:.2f} puntos**"
+            " por encima de la línea del casino."
         )
       else:
         st.info(
-            f"📉 **Tendencia Under (Bajas):** El modelo proyecta"
-            f" {total_proyectado:.2f} puntos frente a los"
-            f" {linea_total_casino:.1f} del casino"
-            f" (-{abs(diferencia_total):.2f} pts de margen)."
+            f"📉 **Oportunidad en Under (Bajas):** El modelo proyecta un juego"
+            f" más cerrado con un margen de **-{abs(margen_total):.2f} puntos**"
+            " por debajo de la línea del casino."
         )
+    else:
+      st.warning(
+          "⚠️ **Línea ajustada en Totales:** El margen respecto al casino no"
+          " supera el filtro mínimo de 3 puntos."
+      )
 
 else:
   st.error("No se pudieron cargar los datos de la NBA.")
