@@ -81,40 +81,45 @@ if df is not None:
         "Calcular y Analizar Margen (+EV)", type="primary", use_container_width=True
     )
 
-  # --- DISEÑO PRINCIPAL DIVIDIDO (CENTRO / DERECHA) ---
-  col_main, col_right = st.columns([3, 1])
+  # --- DISEÑO PRINCIPAL CON ESPACIADOR ---
+  col_main, col_spacer, col_right = st.columns([2.7, 0.15, 1.15])
 
   with col_main:
-    # Obtener IDs y logos para la vista principal
-    id_loc = df[df["TEAM_NAME"] == equipo_local]["TEAM_ID"].values[0]
-    id_vis = df[df["TEAM_NAME"] == equipo_vis]["TEAM_ID"].values[0]
+    # Tarjeta contenedora para el enfrentamiento principal
+    with st.container(border=True):
+      id_loc = df[df["TEAM_NAME"] == equipo_local]["TEAM_ID"].values[0]
+      id_vis = df[df["TEAM_NAME"] == equipo_vis]["TEAM_ID"].values[0]
 
-    # Cabecera visual del enfrentamiento (Matchup)
-    col_h1, col_h2, col_h3 = st.columns([2, 1, 2])
-    with col_h1:
-      st.markdown(
-          f"<h2 style='text-align: right;'>{equipo_local}</h2>",
-          unsafe_allow_html=True,
-      )
-      c1, c2 = st.columns([3, 1])
-      with c2:
-        st.image(
-            f"https://cdn.nba.com/logos/nba/{id_loc}/global/L/logo.svg", width=80
+      # Cabecera visual del enfrentamiento (Matchup)
+      col_h1, col_h2, col_h3 = st.columns([2, 1, 2])
+      with col_h1:
+        st.markdown(
+            f"<h3 style='text-align: right; margin-bottom: 0;'>{equipo_local}</h3>",
+            unsafe_allow_html=True,
+        )
+        c1, c2 = st.columns([3, 1])
+        with c2:
+          st.image(
+              f"https://cdn.nba.com/logos/nba/{id_loc}/global/L/logo.svg",
+              width=75,
+          )
+
+      with col_h2:
+        st.markdown(
+            "<h3 style='text-align: center; color: gray; margin-top: 10px;'>"
+            "VS</h3>",
+            unsafe_allow_html=True,
         )
 
-    with col_h2:
-      st.markdown(
-          "<h2 style='text-align: center; color: gray;'>VS</h2>",
-          unsafe_allow_html=True,
-      )
-
-    with col_h3:
-      st.markdown(f"<h2>{equipo_vis}</h2>", unsafe_allow_html=True)
-      st.image(
-          f"https://cdn.nba.com/logos/nba/{id_vis}/global/L/logo.svg", width=80
-      )
-
-    st.markdown("---")
+      with col_h3:
+        st.markdown(
+            f"<h3 style='text-align: left; margin-bottom: 0;'>{equipo_vis}</h3>",
+            unsafe_allow_html=True,
+        )
+        st.image(
+            f"https://cdn.nba.com/logos/nba/{id_vis}/global/L/logo.svg",
+            width=75,
+        )
 
     if calcular:
       loc = df[df["TEAM_NAME"] == equipo_local]
@@ -216,6 +221,10 @@ if df is not None:
           " resultados."
       )
 
+  # --- ESPACIADOR CENTRAL ---
+  with col_spacer:
+    st.write("")
+
   # --- PANEL DERECHO: PARTIDOS DEL DÍA ---
   with col_right:
     with st.container(border=True):
@@ -238,7 +247,6 @@ if df is not None:
               "No hay partidos programados para hoy en la cartelera oficial."
           )
       except Exception:
-        # Respaldo visual de cartelera
         st.markdown("🏀 **Lakers vs Warriors**")
         st.caption("19:30 CST")
         st.markdown("---")
