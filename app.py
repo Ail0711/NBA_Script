@@ -193,8 +193,7 @@ if df is not None:
       else:
         st.warning("⚠️ Línea ajustada (< 3 pts). Sin valor claro.")
           )
-      else:
-        st.warning("⚠️ Línea ajustada (< 3 pts).")
+ 
           
 else:
   st.error("No se pudieron cargar los datos de la NBA.")
