@@ -1,4 +1,6 @@
+import os
 import pandas as pd
+from nba_api.stats.endpoints import leaguedashteamstats
 import streamlit as st
 
 # Configuración de la página
@@ -13,25 +15,44 @@ st.write(
 )
 
 
-# Cargar los datos (usamos el CSV que ya generamos)
+# Cargar los datos (busca el archivo o lo descarga automáticamente si no existe)
 @st.cache_data
-def cargar_datos():
+def obtener_o_cargar_datos():
+  archivo_csv = "nba_stats_2025-26.csv"
+
+  # Si el archivo ya está en el repositorio, lo leemos
+  if os.path.exists(archivo_csv):
+    return pd.read_csv(archivo_csv)
+
+  # Si por alguna razón no está, lo descargamos al vuelo con la API
   try:
-    # Intentamos cargar la temporada regular o el archivo disponible
-    return pd.read_csv("nba_stats_2025-26.csv")
-  except:
-    try:
-      return pd.read_csv("nba_preseason_stats_2026-27.csv")
-    except:
-      return None
+    team_stats = leaguedashteamstats.LeagueDashTeamStats(
+        season="2025-26", measure_type_detailed_defense="Advanced"
+    )
+    df = team_stats.get_data_frames()[0]
+    columnas_clave = [
+        "TEAM_ID",
+        "TEAM_NAME",
+        "GP",
+        "W",
+        "L",
+        "OFF_RATING",
+        "DEF_RATING",
+        "NET_RATING",
+        "PACE",
+    ]
+    df_filtrado = df[columnas_clave]
+    df_filtrado.to_csv(archivo_csv, index=False)
+    return df_filtrado
+  except Exception as e:
+    return None
 
 
-df = cargar_datos()
+df = obtener_o_cargar_datos()
 
 if df is not None:
   equipos = sorted(df["TEAM_NAME"].unique())
 
-  # Diseño de columnas para la selección de equipos
   col1, col2 = st.columns(2)
 
   with col1:
@@ -41,7 +62,6 @@ if df is not None:
 
   with col2:
     st.subheader("Equipo Visitante")
-    # Seleccionamos por defecto el segundo equipo de la lista
     equipo_vis = st.selectbox(
         "Selecciona visitante", equipos, index=min(1, len(equipos) - 1)
     )
@@ -49,7 +69,6 @@ if df is not None:
 
   st.markdown("---")
 
-  # Botón de cálculo
   if st.button("Calcular Proyección del Partido", type="primary"):
     loc = df[df["TEAM_NAME"] == equipo_local]
     vis = df[df["TEAM_NAME"] == equipo_vis]
@@ -65,7 +84,6 @@ if df is not None:
         vis["DEF_RATING"].values[0],
     )
 
-    # Ajuste por B2B
     if b2b_local:
       drtg_loc *= 1.02
     if b2b_vis:
@@ -74,12 +92,10 @@ if df is not None:
     liga_pace = df["PACE"].mean()
     liga_ortg = df["OFF_RATING"].mean()
 
-    # Motor matemático
     pace_esperado = (pace_loc * pace_vis) / liga_pace
     pts_loc = (ortg_loc * drtg_vis / liga_ortg) * (pace_esperado / 100)
     pts_vis = (ortg_vis * drtg_loc / liga_ortg) * (pace_esperado / 100)
 
-    # Factor de localía (+2.5 puntos repartidos)
     ventaja_localia = 2.5
     pts_loc += ventaja_localia / 2
     pts_vis -= ventaja_localia / 2
@@ -87,7 +103,6 @@ if df is not None:
     total_proyectado = pts_loc + pts_vis
     spread_loc = pts_loc - pts_vis
 
-    # Mostrar Resultados en Pantalla de forma visual
     st.subheader("📊 Resultados de la Proyección")
 
     m1, m2, m3 = st.columns(3)
@@ -103,6 +118,6 @@ if df is not None:
 
 else:
   st.error(
-      "No se encontró el archivo CSV de estadísticas. Asegúrate de tener tu"
-      " archivo en la misma carpeta."
+      "No se pudieron cargar los datos de la NBA. Revisa la conexión con la"
+      " API."
   )
