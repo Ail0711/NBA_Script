@@ -140,66 +140,56 @@ if df is not None:
 
     st.info(f"⚡ **Ritmo Estimado (Pace):** {pace_esperado:.2f} posesiones")
 
-    # --- ANÁLISIS DE VALOR Y MARGEN (ESTILO TÉCNICO) ---
+   # --- ANÁLISIS DE VALOR Y MARGEN (EN DOS COLUMNAS) ---
     st.markdown("### 🎯 Auditoría y Margen de Valor (+EV)")
 
-    # Margen para el Spread
-    # Diferencia entre lo que proyecta el modelo para el local y lo que pide el casino
-    margen_spread = spread_modelo_loc - linea_spread_casino
+    col_mod1, col_mod2 = st.columns(2)
 
-    st.markdown(f"**1. Análisis de Hándicap (Spread):**")
-    st.write(f"- Hándicap estimado por el modelo: **{spread_modelo_loc:+.2f}**")
-    st.write(f"- Hándicap fijado por el casino: **{linea_spread_casino:+.1f}**")
-    st.write(f"- **Margen de Desviación (Edge):** `{margen_spread:+.2f} puntos`")
+    # --- MÓDULO 1: HÁNDICAP (SPREAD) ---
+    with col_mod1:
+      st.markdown(f"**1. Hándicap (Spread)**")
+      margen_spread = spread_modelo_loc - linea_spread_casino
 
-    if abs(margen_spread) >= 2.0:
-      if margen_spread > 0:
-        st.success(
-            f"✅ **VALOR DETECTADO:** El modelo considera que la línea del casino"
-            f" está sobre corrigiendo o subestimando al local. Tienes un margen"
-            f" favorable de **+{margen_spread:.2f} pts** para ir con"
-            f" **{equipo_local}**."
-        )
+      st.write(f"- Modelo: **{spread_modelo_loc:+.2f}**")
+      st.write(f"- Casino: **{linea_spread_casino:+.1f}**")
+      st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
+
+      if abs(margen_spread) >= 2.0:
+        if margen_spread > 0:
+          st.success(
+              f"✅ **VALOR:** Margen favorable de **+{margen_spread:.2f} pts**"
+              f" para ir con **{equipo_local}**."
+          )
+        else:
+          st.success(
+              f"✅ **VALOR:** Ventaja detectada del lado visitante/rival."
+              f" Margen: **{abs(margen_spread):.2f} pts**."
+          )
       else:
-        st.success(
-            f"✅ **VALOR DETECTADO:** El modelo encuentra una ventaja clara del"
-            f" lado visitante o tomando los puntos con el rival. Margen de"
-            f" desviación: **{abs(margen_spread):.2f} pts**."
-        )
-    else:
-      st.warning(
-          "⚠️ **Sin margen suficiente:** La diferencia con la línea del casino"
-          " es menor a 2 puntos. El mercado es eficiente en este encuentro."
-      )
+        st.warning("⚠️ Sin margen suficiente (< 2 pts).")
 
-    st.markdown("---")
+    # --- MÓDULO 2: TOTALES (OVER / UNDER) ---
+    with col_mod2:
+      st.markdown(f"**2. Puntuación Total (O/U)**")
+      margen_total = total_proyectado - linea_total_casino
 
-    # Margen para el Totales (Over/Under)
-    margen_total = total_proyectado - linea_total_casino
+      st.write(f"- Modelo: **{total_proyectado:.2f}**")
+      st.write(f"- Casino: **{linea_total_casino:.1f}**")
+      st.write(f"- **Edge:** `{margen_total:+.2f} pts`")
 
-    st.markdown(f"**2. Análisis de Puntuación Total (Over / Under):**")
-    st.write(f"- Total proyectado por el modelo: **{total_proyectado:.2f}**")
-    st.write(f"- Línea Over/Under del casino: **{linea_total_casino:.1f}**")
-    st.write(f"- **Margen de Desviación (Edge):** `{margen_total:+.2f} puntos`")
-
-    if abs(margen_total) >= 3.0:
-      if margen_total > 0:
-        st.info(
-            f"📈 **Oportunidad en Over (Altas):** El modelo proyecta un partido"
-            f" más dinámico con un margen de **+{margen_total:.2f} puntos**"
-            " por encima de la línea del casino."
-        )
+      if abs(margen_total) >= 3.0:
+        if margen_total > 0:
+          st.info(
+              f"📈 **Over (Altas):** Margen de **+{margen_total:.2f} pts**"
+              " sobre el casino."
+          )
+        else:
+          st.info(
+              f"📉 **Under (Bajas):** Margen de"
+              f" **-{abs(margen_total):.2f} pts** por debajo."
+          )
       else:
-        st.info(
-            f"📉 **Oportunidad en Under (Bajas):** El modelo proyecta un juego"
-            f" más cerrado con un margen de **-{abs(margen_total):.2f} puntos**"
-            " por debajo de la línea del casino."
-        )
-    else:
-      st.warning(
-          "⚠️ **Línea ajustada en Totales:** El margen respecto al casino no"
-          " supera el filtro mínimo de 3 puntos."
-      )
-
+        st.warning("⚠️ Línea ajustada (< 3 pts).")
+          
 else:
   st.error("No se pudieron cargar los datos de la NBA.")
