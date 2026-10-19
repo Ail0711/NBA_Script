@@ -3,15 +3,14 @@ import pandas as pd
 from nba_api.stats.endpoints import leaguedashteamstats
 import streamlit as st
 
-# Configuración de la página
+# Configuración de la página en modo ancho (wide) para aprovechar el espacio
 st.set_page_config(
-    page_title="Modelo NBA +EV Pro", page_icon="🏀", layout="centered"
+    page_title="Modelo NBA +EV Pro", page_icon="🏀", layout="wide"
 )
 
 st.title("🏀 Simulador y Modelo Predictivo NBA (+EV)")
 st.write(
-    "Herramienta cuantitativa avanzada para calcular valor, margen y líneas de"
-    " apuestas."
+    "Panel de control cuantitativo para análisis de valor y márgenes de apuestas."
 )
 
 
@@ -48,70 +47,69 @@ df = obtener_o_cargar_datos()
 if df is not None:
   equipos = sorted(df["TEAM_NAME"].unique())
 
-  col1, col2 = st.columns(2)
+  # --- BARRA LATERAL (CONTROLES Y CONFIGURACIÓN) ---
+  with st.sidebar:
+    st.header("⚙️ Configuración del Partido")
 
-  with col1:
-    with st.container(border=True):
-      st.markdown("### 🏠 Equipo Local")
+    st.subheader("🏠 Equipo Local")
+    equipo_local = st.selectbox("Selecciona local", equipos, index=0, key="loc")
+    b2b_local = st.checkbox("¿Local en Back-to-Back (B2B)?", key="b2b_l")
 
-      # Mostrar el escudo centrado arriba del selector
-      equipo_local = st.selectbox(
-          "Selecciona local", equipos, index=0, key="loc"
-      )
-      id_loc = df[df["TEAM_NAME"] == equipo_local]["TEAM_ID"].values[0]
+    st.markdown("---")
 
-      c_dummy1, c_img_loc, c_dummy2 = st.columns([1, 2, 1])
-      with c_img_loc:
-        st.image(
-            f"https://cdn.nba.com/logos/nba/{id_loc}/global/L/logo.svg",
-            width=100,
-        )
+    st.subheader("✈️ Equipo Visitante")
+    equipo_vis = st.selectbox(
+        "Selecciona visitante",
+        equipos,
+        index=min(1, len(equipos) - 1),
+        key="vis",
+    )
+    b2b_vis = st.checkbox("¿Visitante en Back-to-Back (B2B)?", key="b2b_v")
 
-      b2b_local = st.checkbox("¿Local en Back-to-Back (B2B)?", key="b2b_l")
+    st.markdown("---")
 
-  with col2:
-    with st.container(border=True):
-      st.markdown("### ✈️ Equipo Visitante")
-
-      equipo_vis = st.selectbox(
-          "Selecciona visitante",
-          equipos,
-          index=min(1, len(equipos) - 1),
-          key="vis",
-      )
-      id_vis = df[df["TEAM_NAME"] == equipo_vis]["TEAM_ID"].values[0]
-
-      c_dummy3, c_img_vis, c_dummy4 = st.columns([1, 2, 1])
-      with c_img_vis:
-        st.image(
-            f"https://cdn.nba.com/logos/nba/{id_vis}/global/L/logo.svg",
-            width=100,
-        )
-
-      b2b_vis = st.checkbox("¿Visitante en Back-to-Back (B2B)?", key="b2b_v")
-  st.markdown("---")
-
-  # --- SECCIÓN DE LÍNEAS DEL CASINO ---
-  st.subheader("🎰 Líneas del Casino (Las Vegas / Casa de Apuestas)")
-  col_c1, col_c2 = st.columns(2)
-  with col_c1:
+    st.subheader("🎰 Líneas del Casino")
     linea_spread_casino = st.number_input(
-        f"Spread del Local ({equipo_local}) (Ej: -4.5 o +2.5)",
+        f"Spread del Local ({equipo_local})",
         value=-3.0,
         step=0.5,
         format="%.1f",
     )
-  with col_c2:
     linea_total_casino = st.number_input(
-        "Línea Total de Puntos (Over/Under)",
-        value=225.5,
-        step=0.5,
-        format="%.1f",
+        "Línea Total (Over/Under)", value=225.5, step=0.5, format="%.1f"
     )
+
+    st.markdown("---")
+    calcular = st.button(
+        "Calcular y Analizar Margen (+EV)", type="primary", use_container_width=True
+    )
+
+  # --- PANEL PRINCIPAL ---
+  # Obtener IDs y logos para la vista principal
+  id_loc = df[df["TEAM_NAME"] == equipo_local]["TEAM_ID"].values[0]
+  id_vis = df[df["TEAM_NAME"] == equipo_vis]["TEAM_ID"].values[0]
+
+  # Cabecera visual del enfrentamiento (Matchup)
+  col_h1, col_h2, col_h3 = st.columns([2, 1, 2])
+  with col_h1:
+    st.markdown(f"<h2 style='text-align: right;'>{equipo_local}</h2>", unsafe_allow_html=True)
+    c1, c2 = st.columns([3, 1])
+    with c2:
+      st.image(f"https://cdn.nba.com/logos/nba/{id_loc}/global/L/logo.svg", width=90)
+
+  with col_h2:
+    st.markdown(
+        "<h2 style='text-align: center; color: gray;'>VS</h2>",
+        unsafe_allow_html=True,
+    )
+
+  with col_h3:
+    st.markdown(f"<h2>{equipo_vis}</h2>", unsafe_allow_html=True)
+    st.image(f"https://cdn.nba.com/logos/nba/{id_vis}/global/L/logo.svg", width=90)
 
   st.markdown("---")
 
-  if st.button("Calcular y Analizar Margen (+EV)", type="primary"):
+  if calcular:
     loc = df[df["TEAM_NAME"] == equipo_local]
     vis = df[df["TEAM_NAME"] == equipo_vis]
 
@@ -143,9 +141,7 @@ if df is not None:
     pts_vis -= ventaja_localia / 2
 
     total_proyectado = pts_loc + pts_vis
-    spread_modelo_loc = (
-        pts_loc - pts_vis
-    )  # Positivo si el local gana por el modelo
+    spread_modelo_loc = pts_loc - pts_vis
 
     st.subheader("📊 Resultados de la Proyección")
 
@@ -156,58 +152,63 @@ if df is not None:
 
     st.info(f"⚡ **Ritmo Estimado (Pace):** {pace_esperado:.2f} posesiones")
 
-   # --- ANÁLISIS DE VALOR Y MARGEN (EN DOS COLUMNAS) ---
+    # --- ANÁLISIS DE VALOR Y MARGEN (EN DOS COLUMNAS AMPLIAS) ---
     st.markdown("### 🎯 Auditoría y Margen de Valor (+EV)")
 
     col_mod1, col_mod2 = st.columns(2)
 
     # --- MÓDULO 1: HÁNDICAP (SPREAD) ---
     with col_mod1:
-      st.markdown(f"**1. Hándicap (Spread)**")
-      margen_spread = spread_modelo_loc - linea_spread_casino
+      with st.container(border=True):
+        st.markdown(f"**1. Hándicap (Spread)**")
+        margen_spread = spread_modelo_loc - linea_spread_casino
 
-      st.write(f"- Modelo: **{spread_modelo_loc:+.2f}**")
-      st.write(f"- Casino: **{linea_spread_casino:+.1f}**")
-      st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
+        st.write(f"- Modelo: **{spread_modelo_loc:+.2f}**")
+        st.write(f"- Casino: **{linea_spread_casino:+.1f}**")
+        st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
 
-      if abs(margen_spread) >= 2.0:
-        if margen_spread > 0:
-          st.success(
-              f"✅ **VALOR:** Margen favorable de **+{margen_spread:.2f} pts**"
-              f" para ir con **{equipo_local}**."
-          )
+        if abs(margen_spread) >= 2.0:
+          if margen_spread > 0:
+            st.success(
+                f"✅ **VALOR:** Margen favorable de **+{margen_spread:.2f} pts**"
+                f" para ir con **{equipo_local}**."
+            )
+          else:
+            st.success(
+                f"✅ **VALOR:** Ventaja detectada del lado visitante/rival."
+                f" Margen: **{abs(margen_spread):.2f} pts**."
+            )
         else:
-          st.success(
-              f"✅ **VALOR:** Ventaja detectada del lado visitante/rival."
-              f" Margen: **{abs(margen_spread):.2f} pts**."
-          )
-      else:
-        st.warning("⚠️ Sin margen suficiente (< 2 pts).")
+          st.warning("⚠️ Sin margen suficiente (< 2 pts).")
 
-# --- MÓDULO 2: TOTALES (OVER / UNDER) ---
+    # --- MÓDULO 2: TOTALES (OVER / UNDER) ---
     with col_mod2:
-      st.markdown(f"**2. Puntuación Total (O/U)**")
-      margen_total = total_proyectado - linea_total_casino
+      with st.container(border=True):
+        st.markdown(f"**2. Puntuación Total (O/U)**")
+        margen_total = total_proyectado - linea_total_casino
 
-      st.write(f"- Modelo: **{total_proyectado:.2f}**")
-      st.write(f"- Casino: **{linea_total_casino:.1f}**")
-      st.write(f"- **Edge:** `{margen_total:+.2f} pts`")
+        st.write(f"- Modelo: **{total_proyectado:.2f}**")
+        st.write(f"- Casino: **{linea_total_casino:.1f}**")
+        st.write(f"- **Edge:** `{margen_total:+.2f} pts`")
 
-      if abs(margen_total) >= 3.0:
-        if margen_total > 0:
-          # Si el margen es positivo, se pinta de VERDE (Over / Altas)
-          st.success(
-              f"📈 **Over (Altas):** Margen favorable de **+{margen_total:.2f}"
-              f" pts** sobre el casino."
-          )
+        if abs(margen_total) >= 3.0:
+          if margen_total > 0:
+            st.success(
+                f"📈 **Over (Altas):** Margen favorable de **+{margen_total:.2f}"
+                f" pts** sobre el casino."
+            )
+          else:
+            st.error(
+                f"📉 **Under (Bajas):** Margen favorable de"
+                f" **-{abs(margen_total):.2f} pts** por debajo del casino."
+            )
         else:
-          # Si el margen es negativo, se pinta de ROJO (Under / Bajas)
-          st.error(
-              f"📉 **Under (Bajas):** Margen favorable de"
-              f" **-{abs(margen_total):.2f} pts** por debajo del casino."
-          )
-      else:
-        st.warning("⚠️ Línea ajustada (< 3 pts). Sin valor claro.") 
-          
+          st.warning("⚠️ Línea ajustada (< 3 pts). Sin valor claro.")
+  else:
+    st.info(
+        "👈 Configura los equipos y las líneas en la **barra lateral** y da clic"
+        " en **Calcular y Analizar Margen (+EV)** para ver los resultados."
+    )
+
 else:
   st.error("No se pudieron cargar los datos de la NBA.")
