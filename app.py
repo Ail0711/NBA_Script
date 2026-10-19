@@ -191,9 +191,7 @@ if df is not None:
               f" **-{abs(margen_total):.2f} pts** por debajo del casino."
           )
       else:
-        st.warning("⚠️ Línea ajustada (< 3 pts). Sin valor claro.")
-          )
- 
+        st.warning("⚠️ Línea ajustada (< 3 pts). Sin valor claro.") 
           
 else:
   st.error("No se pudieron cargar los datos de la NBA.")
