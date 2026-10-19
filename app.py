@@ -168,7 +168,7 @@ if df is not None:
       else:
         st.warning("⚠️ Sin margen suficiente (< 2 pts).")
 
-    # --- MÓDULO 2: TOTALES (OVER / UNDER) ---
+# --- MÓDULO 2: TOTALES (OVER / UNDER) ---
     with col_mod2:
       st.markdown(f"**2. Puntuación Total (O/U)**")
       margen_total = total_proyectado - linea_total_casino
@@ -179,14 +179,19 @@ if df is not None:
 
       if abs(margen_total) >= 3.0:
         if margen_total > 0:
-          st.info(
-              f"📈 **Over (Altas):** Margen de **+{margen_total:.2f} pts**"
-              " sobre el casino."
+          # Si el margen es positivo, se pinta de VERDE (Over / Altas)
+          st.success(
+              f"📈 **Over (Altas):** Margen favorable de **+{margen_total:.2f}"
+              f" pts** sobre el casino."
           )
         else:
-          st.info(
-              f"📉 **Under (Bajas):** Margen de"
-              f" **-{abs(margen_total):.2f} pts** por debajo."
+          # Si el margen es negativo, se pinta de ROJO (Under / Bajas)
+          st.error(
+              f"📉 **Under (Bajas):** Margen favorable de"
+              f" **-{abs(margen_total):.2f} pts** por debajo del casino."
+          )
+      else:
+        st.warning("⚠️ Línea ajustada (< 3 pts). Sin valor claro.")
           )
       else:
         st.warning("⚠️ Línea ajustada (< 3 pts).")
