@@ -57,16 +57,31 @@ if df is not None:
 
   with col1:
     st.subheader("Equipo Local")
-    equipo_local = st.selectbox("Selecciona local", equipos, index=0)
-    b2b_local = st.checkbox("¿Local en Back-to-Back (B2B)?")
+    equipo_local = st.selectbox("Selecciona local", equipos, index=0, key="loc")
+
+    # Obtener el TEAM_ID del local para su escudo
+    id_loc = df[df["TEAM_NAME"] == equipo_local]["TEAM_ID"].values[0]
+    # URL oficial del escudo de la NBA usando el ID
+    logo_loc = f"https://cdn.nba.com/logos/nba/{id_loc}/global/L/logo.svg"
+    st.image(logo_loc, width=100)
+
+    b2b_local = st.checkbox("¿Local en Back-to-Back (B2B)?", key="b2b_l")
 
   with col2:
     st.subheader("Equipo Visitante")
     equipo_vis = st.selectbox(
-        "Selecciona visitante", equipos, index=min(1, len(equipos) - 1)
+        "Selecciona visitante",
+        equipos,
+        index=min(1, len(equipos) - 1),
+        key="vis",
     )
-    b2b_vis = st.checkbox("¿Visitante en Back-to-Back (B2B)?")
 
+    # Obtener el TEAM_ID del visitante para su escudo
+    id_vis = df[df["TEAM_NAME"] == equipo_vis]["TEAM_ID"].values[0]
+    logo_vis = f"https://cdn.nba.com/logos/nba/{id_vis}/global/L/logo.svg"
+    st.image(logo_vis, width=100)
+
+    b2b_vis = st.checkbox("¿Visitante en Back-to-Back (B2B)?", key="b2b_v")
   st.markdown("---")
 
   if st.button("Calcular Proyección del Partido", type="primary"):
