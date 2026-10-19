@@ -44,16 +44,37 @@ df = obtener_o_cargar_datos()
 if df is not None:
   equipos = sorted(df["TEAM_NAME"].unique())
 
-  # --- BARRA LATERAL (CONTROLES Y CONFIGURACIÓN) ---
+  # --- BARRA LATERAL (CONTROLES, B2B Y LESIONES) ---
   with st.sidebar:
     st.header("⚙️ Configuración del Partido")
 
+    # 1. EQUIPO LOCAL
     st.subheader("🏠 Equipo Local")
     equipo_local = st.selectbox("Selecciona local", equipos, index=0, key="loc")
     b2b_local = st.checkbox("¿Local en Back-to-Back (B2B)?", key="b2b_l")
 
+    st.markdown("**Reporte de Lesiones (Local):**")
+    lesion_top_local = st.number_input(
+        "Superestrellas Top 5 ausentes", min_value=0, max_value=3, value=0, key="lt_l"
+    )
+    lesion_star_local = st.number_input(
+        "Estrellas / Titulares Elite ausentes",
+        min_value=0,
+        max_value=5,
+        value=0,
+        key="ls_l",
+    )
+    lesion_role_local = st.number_input(
+        "Titulares Regulares / 3&D ausentes",
+        min_value=0,
+        max_value=5,
+        value=0,
+        key="lr_l",
+    )
+
     st.markdown("---")
 
+    # 2. EQUIPO VISITANTE
     st.subheader("✈️ Equipo Visitante")
     equipo_vis = st.selectbox(
         "Selecciona visitante",
@@ -63,8 +84,28 @@ if df is not None:
     )
     b2b_vis = st.checkbox("¿Visitante en Back-to-Back (B2B)?", key="b2b_v")
 
+    st.markdown("**Reporte de Lesiones (Visitante):**")
+    lesion_top_vis = st.number_input(
+        "Superestrellas Top 5 ausentes", min_value=0, max_value=3, value=0, key="lt_v"
+    )
+    lesion_star_vis = st.number_input(
+        "Estrellas / Titulares Elite ausentes",
+        min_value=0,
+        max_value=5,
+        value=0,
+        key="ls_v",
+    )
+    lesion_role_vis = st.number_input(
+        "Titulares Regulares / 3&D ausentes",
+        min_value=0,
+        max_value=5,
+        value=0,
+        key="lr_v",
+    )
+
     st.markdown("---")
 
+    # 3. LÍNEAS DEL CASINO
     st.subheader("🎰 Líneas del Casino")
     linea_spread_casino = st.number_input(
         f"Spread del Local ({equipo_local})",
@@ -85,12 +126,10 @@ if df is not None:
   col_main, col_spacer, col_right = st.columns([2.7, 0.15, 1.15])
 
   with col_main:
-    # Tarjeta contenedora para el enfrentamiento principal
     with st.container(border=True):
       id_loc = df[df["TEAM_NAME"] == equipo_local]["TEAM_ID"].values[0]
       id_vis = df[df["TEAM_NAME"] == equipo_vis]["TEAM_ID"].values[0]
 
-      # Cabecera visual del enfrentamiento (Matchup)
       col_h1, col_h2, col_h3 = st.columns([2, 1, 2])
       with col_h1:
         st.markdown(
@@ -136,10 +175,30 @@ if df is not None:
           vis["DEF_RATING"].values[0],
       )
 
+      # --- AJUSTE POR BACK-TO-BACK ---
       if b2b_local:
         drtg_loc *= 1.02
       if b2b_vis:
         drtg_vis *= 1.02
+
+      # --- AJUSTE MATEMÁTICO POR LESIONES (ACUMULATIVO) ---
+      # Descuento porcentual en la eficiencia ofensiva (Offensive Rating)
+      descuento_local = (
+          (lesion_top_local * 0.09)
+          + (lesion_star_local * 0.05)
+          + (lesion_role_local * 0.025)
+      )
+      descuento_vis = (
+          (lesion_top_vis * 0.09)
+          + (lesion_star_vis * 0.05)
+          + (lesion_role_vis * 0.025)
+      )
+
+      # Aplicamos el descuento a la ofensiva
+      ortg_loc *= 1.0 - min(
+          descuento_local, 0.25
+      )  # Tope máximo de 25% de caída
+      ortg_vis *= 1.0 - min(descuento_vis, 0.25)
 
       liga_pace = df["PACE"].mean()
       liga_ortg = df["OFF_RATING"].mean()
@@ -155,7 +214,7 @@ if df is not None:
       total_proyectado = pts_loc + pts_vis
       spread_modelo_loc = pts_loc - pts_vis
 
-      st.subheader("📊 Resultados de la Proyección")
+      st.subheader("📊 Resultados de la Proyección (Con Ajuste de Lesiones)")
 
       m1, m2, m3 = st.columns(3)
       m1.metric(label=f"Pts {equipo_local}", value=f"{pts_loc:.2f}")
@@ -216,16 +275,14 @@ if df is not None:
             st.warning("⚠️ Línea ajustada (< 3 pts). Sin valor claro.")
     else:
       st.info(
-          "👈 Configura los equipos y las líneas en la **barra lateral** y da"
-          " clic en **Calcular y Analizar Margen (+EV)** para ver los"
-          " resultados."
+          "👈 Configura los equipos, las lesiones y las líneas en la **barra"
+          " lateral** y da clic en **Calcular y Analizar Margen (+EV)** para ver"
+          " los resultados."
       )
 
-  # --- ESPACIADOR CENTRAL ---
   with col_spacer:
     st.write("")
 
-  # --- PANEL DERECHO: PARTIDOS DEL DÍA ---
   with col_right:
     with st.container(border=True):
       st.subheader("📅 Partidos de Hoy")
