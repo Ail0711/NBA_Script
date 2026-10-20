@@ -271,6 +271,7 @@ if df is not None:
         with st.container(border=True):
           st.markdown(f"**1. Hándicap (Spread)**")
           # Corregimos la resta considerando el signo del favorito del casino
+        # Corregimos la resta considerando el signo del favorito del casino
         margen_spread = spread_modelo_loc - linea_spread_casino
 
         st.write(f"- Modelo: **{spread_modelo_loc:+.2f}**")
@@ -293,7 +294,6 @@ if df is not None:
             )
         else:
           st.warning("⚠️ Sin margen suficiente (< 2 pts).")
-
         
       with col_mod2:
         with st.container(border=True):
