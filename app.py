@@ -263,7 +263,7 @@ if df is not None:
       st.info(f"⚡ **Ritmo Estimado (Pace):** {pace_esperado:.2f} posesiones")
 
       # --- ANÁLISIS DE VALOR Y MARGEN (EN DOS COLUMNAS) ---
-      st.markdown("### 🎯 Auditoría y Margen de Valor (+EV)")
+      st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
 
       col_mod1, col_mod2 = st.columns(2)
 
