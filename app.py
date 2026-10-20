@@ -272,29 +272,29 @@ if df is not None:
             st.markdown(f"**1. Hándicap (Spread)**")
             margen_spread = spread_modelo_loc - linea_spread_casino
 
-        st.write(f"- Modelo: **{spread_modelo_loc:+.2f}**")
-        st.write(f"- Casino: **{linea_spread_casino:+.1f}**")
-        st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
+            st.write(f"- Modelo: **{spread_modelo_loc:+.2f}**")
+            st.write(f"- Casino: **{linea_spread_casino:+.1f}**")
+            st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
 
-        if abs(margen_spread) >= 2.0:
-          if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
-            st.success(
-                f"✅ **VALOR (COVER):** El casino pide que **{equipo_local}** "
-                f"gane por más de {abs(linea_spread_casino)} pts, pero el modelo "
-                f"proyecta una diferencia mayor. ¡Gran valor cubriendo el hándicap!"
-            )
-          elif margen_spread > 0:
-            st.success(
-                f"✅ **VALOR:** El modelo ve una diferencia favorable de "
-                f"**+{abs(margen_spread):.2f} pts** respecto a la línea del casino."
-            )
-          else:
-            st.success(
-                f"✅ **VALOR:** Ventaja detectada del lado visitante / rival. "
-                f"Margen: **{abs(margen_spread):.2f} pts**."
-            )
-        else:
-          st.warning("⚠️ Sin margen suficiente (< 2 pts).")
+            if abs(margen_spread) >= 2.0:
+              if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
+                st.success(
+                    f"✅ **VALOR (COVER):** El casino pide que **{equipo_local}** "
+                    f"gane por más de {abs(linea_spread_casino)} pts, pero el modelo "
+                    f"proyecta una diferencia mayor. ¡Gran valor cubriendo el hándicap!"
+                    )
+              elif margen_spread > 0:
+                st.success(
+                    f"✅ **VALOR:** El modelo ve una diferencia favorable de "
+                    f"**+{abs(margen_spread):.2f} pts** respecto a la línea del casino."
+                )
+              else:
+                st.success(
+                    f"✅ **VALOR:** Ventaja detectada del lado visitante / rival. "
+                    f"Margen: **{abs(margen_spread):.2f} pts**."
+                )
+            else:
+              st.warning("⚠️ Sin margen suficiente (< 2 pts).")
                 
       with col_mod2:
         with st.container(border=True):
