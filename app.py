@@ -270,26 +270,31 @@ if df is not None:
       with col_mod1:
         with st.container(border=True):
           st.markdown(f"**1. Hándicap (Spread)**")
-          margen_spread = spread_modelo_loc - linea_spread_casino
+          # Corregimos la resta considerando el signo del favorito del casino
+        margen_spread = spread_modelo_loc - linea_spread_casino
 
-          st.write(f"- Modelo: **{spread_modelo_loc:+.2f}**")
-          st.write(f"- Casino: **{linea_spread_casino:+.1f}**")
-          st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
+        st.write(f"- Modelo: **{spread_modelo_loc:+.2f}**")
+        st.write(f"- Casino: **{linea_spread_casino:+.1f}**")
+        st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
 
-          if abs(margen_spread) >= 2.0:
-            if margen_spread > 0:
-              st.success(
-                  f"✅ **VALOR:** Margen favorable de **+{margen_spread:.2f} pts**"
-                  f" para ir con **{equipo_local}**."
-              )
-            else:
-              st.success(
-                  f"✅ **VALOR:** Ventaja detectada del lado visitante/rival."
-                  f" Margen: **{abs(margen_spread):.2f} pts**."
-              )
+        if abs(margen_spread) >= 2.0:
+          # Evaluamos si el valor favorece al local o al visitante según el spread real
+          if (spread_modelo_loc - linea_spread_casino) > 0:
+            st.success(
+                f"✅ **VALOR:** El modelo ve mayor ventaja o solidez en"
+                f" **{equipo_local}** frente a la línea de Las Vegas. Margen:"
+                f" **+{abs(margen_spread):.2f} pts**."
+            )
           else:
-            st.warning("⚠️ Sin margen suficiente (< 2 pts).")
+            st.success(
+                f"✅ **VALOR:** El modelo ve valor del lado del visitante ("
+                f"**{equipo_vis}**). Margen:"
+                f" **+{abs(margen_spread):.2f} pts**."
+            )
+        else:
+          st.warning("⚠️ Sin margen suficiente (< 2 pts).")
 
+        
       with col_mod2:
         with st.container(border=True):
           st.markdown(f"**2. Puntuación Total (O/U)**")
