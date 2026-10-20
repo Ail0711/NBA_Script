@@ -268,9 +268,9 @@ if df is not None:
       col_mod1, col_mod2 = st.columns(2)
 
       with col_mod1:
-      with st.container(border=True):
-        st.markdown(f"**1. Hándicap (Spread)**")
-        margen_spread = spread_modelo_loc - linea_spread_casino
+          with st.container(border=True):
+            st.markdown(f"**1. Hándicap (Spread)**")
+            margen_spread = spread_modelo_loc - linea_spread_casino
 
         st.write(f"- Modelo: **{spread_modelo_loc:+.2f}**")
         st.write(f"- Casino: **{linea_spread_casino:+.1f}**")
