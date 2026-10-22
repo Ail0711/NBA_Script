@@ -318,8 +318,8 @@ if df is not None:
         else:
           st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 3 pts). Mejor evitar.")
             
-    else:
-      st.info(
+      else:
+          st.info(
           "👈 Configura los equipos, las lesiones y las líneas en la **barra"
           " lateral** y da clic en **Calcular y Analizar Margen (+EV)** para ver"
           " los resultados."
