@@ -172,7 +172,7 @@ with col_main:
         st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
 
     # --- ANÁLISIS DE VALOR Y MARGEN CON LOGOS PARA CAPTURA ---
-    st.markdown("### 🎯 Decision NoCar Modelo")
+    st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
 
     with st.container(border=True):
       banner_l, banner_mid, banner_v = st.columns([1, 0.2, 1])
@@ -188,16 +188,17 @@ with col_main:
       with banner_v:
         b_txt2, b_img2 = st.columns([0.75, 0.25])
         with b_txt2:
-          st.markdown(f"<div style='text-align: right;'>{equipo_vis}</div>", unsafe_allow_html=True)
+          st.markdown(f"<div style='text-align: right;'>**{equipo_vis}**</div>", unsafe_allow_html=True)
           st.caption("<div style='text-align: right;'>Visitante</div>", unsafe_allow_html=True)
         with b_img2:
           if vis_logo: st.image(vis_logo, width=35)
 
+    # Contenedor con altura fija (height) para nivelar los bordes inferiores de ambas tarjetas
     col_mod1, col_mod2 = st.columns(2)
 
     # --- MÓDULO 1: HÁNDICAP (SPREAD) ---
     with col_mod1:
-      with st.container(border=True):
+      with st.container(border=True, height=360):
         st.markdown(f"**1. Hándicap (Spread)**")
         st.write(f"- Línea del Casino: **{linea_spread_casino:+.1f} pts**")
         
@@ -208,7 +209,6 @@ with col_main:
         else:
           desc_edge_spread = "Línea ajustada, el casino está acertado"
 
-        # Etiqueta aclaratoria para evitar confusión con el hándicap
         st.markdown(
             f"- **Ventaja Modelo (+EV):** `{margen_spread:+.2f} pts`\n"
             f"  *<small style='color: gray;'>💡 {desc_edge_spread}</small>*",
@@ -218,28 +218,25 @@ with col_main:
         if abs(margen_spread) >= 2.0:
           if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
             st.success(
-                f"✅ **APUESTA RECOMENDADA:** **Ir con Hándicap a {equipo_local} ({linea_spread_casino:+.1f})**\n\n"
-                f"**Análisis:** El modelo detecta un gran valor cuantitativo. Se recomienda ir a favor del hándicap de "
-                f"**{equipo_local}** porque el modelo proyecta que superarán la línea fijada por el casino."
+                f"✅ **APUESTA RECOMENDADA:** **Hándicap a {equipo_local} ({linea_spread_casino:+.1f})**\n\n"
+                f"**Análisis:** El modelo proyecta que superarán la línea fijada por el casino."
             )
           elif margen_spread > 0:
             st.success(
-                f"✅ **APUESTA RECOMENDADA:** **Ir con Hándicap a {equipo_local}**\n\n"
-                f"**Análisis:** Hay una ventaja de **+{abs(margen_spread):.2f} pts** a favor de nuestro modelo. "
-                f"Se recomienda ir con el hándicap de **{equipo_local}**."
+                f"✅ **APUESTA RECOMENDADA:** **Hándicap a {equipo_local}**\n\n"
+                f"**Análisis:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente a Las Vegas."
             )
           else:
             st.success(
-                f"✅ **APUESTA RECOMENDADA:** **Ir con Hándicap a {equipo_vis} (Visitante)**\n\n"
-                f"**Análisis:** Ventaja detectada del lado visitante con un margen de **{abs(margen_spread):.2f} pts**. "
-                f"Se recomienda ir con el hándicap a favor de **{equipo_vis}**."
+                f"✅ **APUESTA RECOMENDADA:** **Hándicap a {equipo_vis} (Visitante)**\n\n"
+                f"**Análisis:** Ventaja detectada del lado visitante con un margen de **{abs(margen_spread):.2f} pts**."
             )
         else:
-          st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 2 pts). Mejor evitar.")
+          st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 2 pts).")
 
     # --- MÓDULO 2: PUNTUACIÓN TOTAL (O/U) ---
     with col_mod2:
-      with st.container(border=True):
+      with st.container(border=True, height=360):
         st.markdown(f"**2. Puntuación Total (O/U)**")
         st.write(f"- Línea del Casino: **{linea_total_casino:.1f} pts**")
         
@@ -260,17 +257,15 @@ with col_main:
           if margen_total > 0:
             st.success(
                 f"📈 **APUESTA RECOMENDADA:** **OVER (Altas) {linea_total_casino:.1f}**\n\n"
-                f"**Análisis:** Margen favorable de **+{margen_total:.2f} pts** por encima del casino. "
-                f"Se proyecta un partido con mayor goleo, ideal para buscar las **Altas (Over)**."
+                f"**Análisis:** Margen favorable de **+{margen_total:.2f} pts** por encima del casino."
             )
           else:
             st.error(
                 f"📉 **APUESTA RECOMENDADA:** **UNDER (Bajas) {linea_total_casino:.1f}**\n\n"
-                f"**Análisis:** Margen favorable de **-{abs(margen_total):.2f} pts** por debajo del casino. "
-                f"Se proyecta un juego más defensivo o cerrado, ideal para buscar las **Bajas (Under)**."
+                f"**Análisis:** Margen favorable de **-{abs(margen_total):.2f} pts** por debajo del casino."
             )
         else:
-          st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 3 pts). Mejor evitar.")
+          st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 3 pts).")
   else:
     st.info(
         "👉 Configura los equipos, las lesiones y las líneas en la **barra"
