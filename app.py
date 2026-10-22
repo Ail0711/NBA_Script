@@ -323,21 +323,4 @@ with col_right:
           "El modelo funciona al 100% con tu base local. Intenta recargar en"
           " unos minutos."
       )
-loc_info = df[df["full_name"] == equipo_local]
-vis_info = df[df["full_name"] == equipo_vis]
 
-loc_id = loc_info["id"].values[0] if not loc_info.empty else None
-vis_id = vis_info["id"].values[0] if not vis_info.empty else None
-
-loc_logo = f"https://cdn.nba.com/logos/nba/{loc_id}/global/L/logo.svg" if loc_id else ""
-vis_logo = f"https://cdn.nba.com/logos/nba/{vis_id}/global/L/logo.svg" if vis_id else ""
-
-# --- DISTRIBUCIÓN PRINCIPAL (LAYOUT) ---
-col_main, col_spacer, col_right = st.columns([2.2, 0.1, 1.1])
-
-with col_main:
-  # Cabecera visual unificada y perfectamente alineada con HTML puro
-  with st.container(border=True):
-    col_l_img, col_vs, col_v_img = st.columns([1, 0.3, 1])
-    
-    with col_l_img:
