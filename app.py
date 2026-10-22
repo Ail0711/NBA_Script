@@ -272,10 +272,13 @@ col_mod1, col_mod2 = st.columns(2)
 with col_mod1:
     with st.container(border=True):
         st.markdown(f"**1. Hándicap (Spread)**")
-        margen_spread = spread_modelo_loc - linea_spread_casino
 
+        # 1. Primero mostramos las variables que vienen de tu modelo y del casino
         st.write(f"- Modelo: **{spread_modelo_loc:+.2f} pts**")
         st.write(f"- Casino: **{linea_spread_casino:+.1f} pts**")
+
+        # 2. Después calculamos el margen utilizando esas variables ya existentes
+        margen_spread = spread_modelo_loc - linea_spread_casino
         st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
 
         if abs(margen_spread) >= 2.0:
@@ -296,7 +299,7 @@ with col_mod1:
                 )
         else:
             st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 2 pts). Mejor evitar.")
-
+            
 # --- MÓDULO 2: PUNTUACIÓN TOTAL (O/U) ---
 with col_mod2:
     with st.container(border=True):
