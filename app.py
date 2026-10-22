@@ -201,7 +201,6 @@ with col_main:
         st.markdown(f"**1. Hándicap (Spread)**")
         st.write(f"- Casino: **{linea_spread_casino:+.1f} pts**")
         
-        # Explicación conceptual del Edge (Spread)
         if abs(margen_spread) >= 4.0:
           desc_edge_spread = "Desajuste masivo vs Las Vegas (Alta confianza)"
         elif abs(margen_spread) >= 2.0:
@@ -219,17 +218,20 @@ with col_main:
           if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
             st.success(
                 f"✅ **LÍNEA A TOMAR:** **{equipo_local} ({linea_spread_casino:+.1f})**\n\n"
-                f"**Recomendación:** El modelo proyecta una diferencia mayor a la exigida por el casino. ¡Gran valor cubriendo el hándicap!"
+                f"**Recomendación:** El modelo proyecta una diferencia mayor a la exigida por el casino. "
+                f"Apuesta a favor de **{equipo_local}** cubriendo el hándicap de `{linea_spread_casino:+.1f}` puntos."
             )
           elif margen_spread > 0:
             st.success(
                 f"✅ **LÍNEA A TOMAR:** **{equipo_local}**\n\n"
-                f"**Recomendación:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente a Las Vegas."
+                f"**Recomendación:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente a Las Vegas. "
+                f"Se recomienda ir con **{equipo_local}** para superar la línea del casino."
             )
           else:
             st.success(
                 f"✅ **LÍNEA A TOMAR:** **{equipo_vis} (Visitante)**\n\n"
-                f"**Recomendación:** Ventaja detectada del lado visitante. Margen: **{abs(margen_spread):.2f} pts**."
+                f"**Recomendación:** Ventaja detectada del lado visitante con un margen de **{abs(margen_spread):.2f} pts**. "
+                f"Se recomienda ir a favor de **{equipo_vis}**."
             )
         else:
           st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 2 pts). Mejor evitar.")
@@ -240,7 +242,6 @@ with col_main:
         st.markdown(f"**2. Puntuación Total (O/U)**")
         st.write(f"- Casino: **{linea_total_casino:.1f} pts**")
         
-        # Explicación conceptual del Edge (Total O/U)
         if abs(margen_total) >= 5.0:
           desc_edge_total = "Diferencia notable en ritmo/ofensiva proyectada"
         elif abs(margen_total) >= 3.0:
@@ -258,12 +259,14 @@ with col_main:
           if margen_total > 0:
             st.success(
                 f"📈 **LÍNEA A TOMAR:** **OVER (Altas) {linea_total_casino:.1f}**\n\n"
-                f"**Recomendación:** Margen favorable de **+{margen_total:.2f} pts** por encima del casino."
+                f"**Recomendación:** Margen favorable de **+{margen_total:.2f} pts** por encima del casino. "
+                f"Se proyecta un partido con mayor goleo, ideal para buscar las **Altas (Over)**."
             )
           else:
             st.error(
                 f"📉 **LÍNEA A TOMAR:** **UNDER (Bajas) {linea_total_casino:.1f}**\n\n"
-                f"**Recomendación:** Margen favorable de **-{abs(margen_total):.2f} pts** por debajo del casino."
+                f"**Recomendación:** Margen favorable de **-{abs(margen_total):.2f} pts** por debajo del casino. "
+                f"Se proyecta un juego más defensivo o cerrado, ideal para buscar las **Bajas (Under)**."
             )
         else:
           st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 3 pts). Mejor evitar.")
