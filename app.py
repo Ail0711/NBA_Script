@@ -328,49 +328,37 @@ if df is not None:
   with col_spacer:
     st.write("")
 
-  # --- PANEL DERECHO: PARTIDOS DE HOY (AUTOMÁTICO) ---
+  # --- PANEL DERECHO: PARTIDOS DE HOY (ROBUSTO CON DF) ---
   with col_right:
     with st.container(border=True):
       st.subheader("📅 Partidos de Hoy")
       st.caption("Cartelera oficial en tiempo real")
 
       try:
-        # Obtenemos la fecha actual automáticamente
         hoy_str = datetime.today().strftime("%m/%d/%Y")
-        
-        # Consultamos la API oficial para la fecha de hoy
         board = scoreboardv2.ScoreboardV2(game_date=hoy_str)
         headers = board.game_header.get_data_frame()
-        lineups = board.line_score.get_data_frame() if hasattr(board, 'line_score') else None
 
         if not headers.empty:
           for idx, row in headers.iterrows():
-            game_id = row.get("GAME_ID")
             status = row.get("GAME_STATUS_TEXT", "Programado")
+            home_id = row.get("HOME_TEAM_ID")
+            vis_id = row.get("VISITOR_TEAM_ID")
             
-            if lineups is not None and not lineups.empty:
-              teams_in_game = lineups[lineups['GAME_ID'] == game_id]
-              if len(teams_in_game) >= 2:
-                vis_team = teams_in_game.iloc[0]['TEAM_NAME']
-                loc_team = teams_in_game.iloc[1]['TEAM_NAME']
-                st.markdown(f"🏀 **{vis_team} vs {loc_team}**")
-                st.caption(f"Estado: {status}")
-                st.markdown("---")
-              else:
-                st.markdown(f"🏀 **Partido {idx+1}**")
-                st.caption(f"Estado: {status}")
-                st.markdown("---")
-            else:
-              st.markdown(f"🏀 **Partido de la Jornada {idx+1}**")
-              st.caption(f"Estado: {status}")
-              st.markdown("---")
+            # Buscamos los nombres directamente en nuestro DataFrame principal
+            home_row = df[df['TEAM_ID'] == home_id]
+            vis_row = df[df['TEAM_ID'] == vis_id]
+            
+            h_name = home_row['TEAM_NAME'].values[0] if not home_row.empty else f"Equipo {home_id}"
+            v_name = vis_row['TEAM_NAME'].values[0] if not vis_row.empty else f"Equipo {vis_id}"
+            
+            st.markdown(f"🏀 **{v_name} vs {h_name}**")
+            st.caption(f"Estado: {status}")
+            st.markdown("---")
         else:
-          # Si hoy no hay partidos en la API (ej. día de descanso o pretemporada)
-          st.info(f"No hay encuentros programados en la cartelera oficial para el día de hoy ({datetime.today().strftime('%d/%m/%Y')}).")
-          st.caption("El sistema se sincronizará automáticamente en la próxima jornada.")
+          st.info(f"No hay encuentros programados en la cartelera oficial para hoy ({datetime.today().strftime('%d/%m/%Y')}).")
           
       except Exception as e:
-        st.warning("Conectando con la cartelera de la NBA...")
-
+        st.warning(f"Sincronizando cartelera en vivo...")
 else:
   st.error("No se pudieron cargar los datos de la NBA.")
