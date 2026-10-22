@@ -197,7 +197,7 @@ with col_main:
 
     # --- MÓDULO 1: HÁNDICAP (SPREAD) ---
     with col_mod1:
-      with st.container(border=True, height=410):
+      with st.container(border=True, height=355):
         st.markdown(f"**1. Hándicap (Spread)**")
         st.markdown(f"- Línea del Casino: **{linea_spread_casino:+.1f} pts**")
         
@@ -214,7 +214,7 @@ with col_main:
             unsafe_allow_html=True
         )
         
-        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
 
         if abs(margen_spread) >= 2.0:
           if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
@@ -240,7 +240,7 @@ with col_main:
 
     # --- MÓDULO 2: PUNTUACIÓN TOTAL (O/U) ---
     with col_mod2:
-      with st.container(border=True, height=410):
+      with st.container(border=True, height=355):
         st.markdown(f"**2. Puntuación Total (O/U)**")
         st.markdown(f"- Línea del Casino: **{linea_total_casino:.1f} pts**")
         
@@ -257,7 +257,7 @@ with col_main:
             unsafe_allow_html=True
         )
         
-        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
 
         if abs(margen_total) >= 3.0:
           if margen_total > 0:
