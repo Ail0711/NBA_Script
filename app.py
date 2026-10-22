@@ -263,46 +263,43 @@ if df is not None:
       st.info(f"⚡ **Ritmo Estimado (Pace):** {pace_esperado:.2f} posesiones")
 
       # --- ANÁLISIS DE VALOR Y MARGEN (TARJETAS PROFESIONALES) ---
-    st.markdown("### 🎯 Auditoría y Recomendación de Apuesta (+EV)")
+    # --- ANÁLISIS DE VALOR Y MARGEN (EN DOS COLUMNAS) ---
+st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
 
-    col_mod1, col_mod2 = st.columns(2)
+col_mod1, col_mod2 = st.columns(2)
 
-    # --- MÓDULO 1: HÁNDICAP (SPREAD) ---
+# --- MÓDULO 1: HÁNDICAP (SPREAD) ---
 with col_mod1:
-  with st.container(border=True):
-    st.markdown(f"**1. Hándicap (Spread)**")
-    margen_spread = spread_modelo_loc - linea_spread_casino
+    with st.container(border=True):
+        st.markdown(f"**1. Hándicap (Spread)**")
+        margen_spread = spread_modelo_loc - linea_spread_casino
 
-    st.write(f"- Modelo: **{spread_modelo_loc:+.2f} pts**")
-    st.write(f"- Casino: **{linea_spread_casino:+.1f} pts**")
-    st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
+        st.write(f"- Modelo: **{spread_modelo_loc:+.2f} pts**")
+        st.write(f"- Casino: **{linea_spread_casino:+.1f} pts**")
+        st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
 
-    if abs(margen_spread) >= 2.0:
-      if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
-        st.success(
-            f"✅ **LÍNEA A TOMAR:** **{equipo_local}"
-            f" ({linea_spread_casino:+.1f})**\n\n**Recomendación:** El modelo"
-            " proyecta una diferencia mayor a la exigida por el casino. ¡Gran"
-            " valor cubriendo el hándicap!"
-        )
-      elif margen_spread > 0:
-        st.success(
-            f"✅ **LÍNEA A TOMAR:** **{equipo_local}**\n\n**Recomendación:**"
-            f" Margen favorable de **+{abs(margen_spread):.2f} pts** frente a"
-            " Las Vegas."
-        )
-      else:
-        st.success(
-            f"✅ **LÍNEA A TOMAR:** **{equipo_vis} (Visitante)**\n\n**Recomendación:**"
-            f" Ventaja detectada del lado visitante. Margen:"
-            f" **{abs(margen_spread):.2f} pts**."
-        )
-    else:
-      st.warning(
-          "⚠️ **Línea ajustada:** Sin margen suficiente (< 2 pts). Mejor evitar."
-      )
-    with col_mod2:
-      with st.container(border=True):
+        if abs(margen_spread) >= 2.0:
+            if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
+                st.success(
+                    f"✅ **LÍNEA A TOMAR:** **{equipo_local} ({linea_spread_casino:+.1f})**\n\n"
+                    f"**Recomendación:** El modelo proyecta una diferencia mayor a la exigida por el casino. ¡Gran valor cubriendo el hándicap!"
+                )
+            elif margen_spread > 0:
+                st.success(
+                    f"✅ **LÍNEA A TOMAR:** **{equipo_local}**\n\n"
+                    f"**Recomendación:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente a Las Vegas."
+                )
+            else:
+                st.success(
+                    f"✅ **LÍNEA A TOMAR:** **{equipo_vis} (Visitante)**\n\n"
+                    f"**Recomendación:** Ventaja detectada del lado visitante. Margen: **{abs(margen_spread):.2f} pts**."
+                )
+        else:
+            st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 2 pts). Mejor evitar.")
+
+# --- MÓDULO 2: PUNTUACIÓN TOTAL (O/U) ---
+with col_mod2:
+    with st.container(border=True):
         st.markdown(f"**2. Puntuación Total (O/U)**")
         margen_total = total_proyectado - linea_total_casino
 
@@ -311,60 +308,68 @@ with col_mod1:
         st.write(f"- **Edge:** `{margen_total:+.2f} pts`")
 
         if abs(margen_total) >= 3.0:
-          if margen_total > 0:
-            st.success(
-                f"📈 **LÍNEA A TOMAR:** **OVER (Altas) {linea_total_casino:.1f}**\n\n"
-                f"**Recomendación:** Margen favorable de **+{margen_total:.2f} pts** por encima del casino."
-            )
-          else:
-            st.error(
-                f"📉 **LÍNEA A TOMAR:** **UNDER (Bajas) {linea_total_casino:.1f}**\n\n"
-                f"**Recomendación:** Margen favorable de **-{abs(margen_total):.2f} pts** por debajo del casino."
-            )
+            if margen_total > 0:
+                st.success(
+                    f"📈 **LÍNEA A TOMAR:** **OVER (Altas) {linea_total_casino:.1f}**\n\n"
+                    f"**Recomendación:** Margen favorable de **+{margen_total:.2f} pts** por encima del casino."
+                )
+            else:
+                st.error(
+                    f"📉 **LÍNEA A TOMAR:** **UNDER (Bajas) {linea_total_casino:.1f}**\n\n"
+                    f"**Recomendación:** Margen favorable de **-{abs(margen_total):.2f} pts** por debajo del casino."
+                )
         else:
-          st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 3 pts). Mejor evitar.")
+            st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 3 pts). Mejor evitar.")
             
-      else:
-          st.info(
-          "👈 Configura los equipos, las lesiones y las líneas en la **barra"
-          " lateral** y da clic en **Calcular y Analizar Margen (+EV)** para ver"
-          " los resultados."
-      )
-
-  with col_spacer:
+with col_spacer:
     st.write("")
 
-  # --- PANEL DERECHO: PARTIDOS DE HOY (CORREGIDO) ---
-  with col_right:
+# --- PANEL DERECHO: PARTIDOS DE HOY ---
+with col_right:
     with st.container(border=True):
-      st.subheader("📅 Partidos de Hoy")
-      st.caption("Cartelera oficial en tiempo real")
+        st.subheader("📅 Partidos de Hoy")
+        st.caption("Cartelera oficial en tiempo real")
 
-      try:
-        # Formato correcto que exige la API de la NBA: YYYY-MM-DD
-        hoy_str = datetime.today().strftime("%Y-%m-%d")
-        board = scoreboardv2.ScoreboardV2(game_date=hoy_str)
-        headers = board.game_header.get_data_frame()
+        try:
+            hoy_str = datetime.today().strftime("%Y-%m-%d")
+            board = scoreboardv2.ScoreboardV2(game_date=hoy_str, timeout=10)
+            headers = board.game_header.get_data_frame()
 
-        if not headers.empty:
-          for idx, row in headers.iterrows():
-            status = row.get("GAME_STATUS_TEXT", "Programado")
-            home_id = row.get("HOME_TEAM_ID")
-            vis_id = row.get("VISITOR_TEAM_ID")
-            
-            home_row = df[df['TEAM_ID'] == home_id]
-            vis_row = df[df['TEAM_ID'] == vis_id]
-            
-            h_name = home_row['TEAM_NAME'].values[0] if not home_row.empty else f"Equipo {home_id}"
-            v_name = vis_row['TEAM_NAME'].values[0] if not vis_row.empty else f"Equipo {vis_id}"
-            
-            st.markdown(f"🏀 **{v_name} vs {h_name}**")
-            st.caption(f"Estado: {status}")
-            st.markdown("---")
-        else:
-          st.info(f"No hay encuentros programados en la cartelera oficial para hoy.")
-          
-      except Exception as e:
-        st.warning(f"Error al sincronizar: {e}")
-else:
-  st.error("No se pudieron cargar los datos de la NBA.")
+            if not headers.empty:
+                for idx, row in headers.iterrows():
+                    status = row.get("GAME_STATUS_TEXT", "Programado")
+                    home_id = row.get("HOME_TEAM_ID")
+                    vis_id = row.get("VISITOR_TEAM_ID")
+
+                    home_row = df[df["TEAM_ID"] == home_id]
+                    vis_row = df[df["TEAM_ID"] == vis_id]
+
+                    h_name = (
+                        home_row["TEAM_NAME"].values[0]
+                        if not home_row.empty
+                        else f"Equipo {home_id}"
+                    )
+                    v_name = (
+                        vis_row["TEAM_NAME"].values[0]
+                        if not vis_row.empty
+                        else f"Equipo {vis_id}"
+                    )
+
+                    st.markdown(f"🏀 **{v_name} vs {h_name}**")
+                    st.caption(f"Estado: {status}")
+                    st.markdown("---")
+            else:
+                st.info(
+                    "No hay encuentros programados para hoy en la cartelera"
+                    " oficial."
+                )
+
+        except Exception as e:
+            st.warning(
+                "⚠️ **Servidor de la NBA ocupado (Timeout):**"
+                " `stats.nba.com` tardó en responder."
+            )
+            st.caption(
+                "El modelo funciona al 100% con tu base local. Intenta recargar"
+                " en unos minutos."
+            )
