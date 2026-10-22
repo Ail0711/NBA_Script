@@ -88,7 +88,7 @@ calcular = st.sidebar.button(
 col_main, col_spacer, col_right = st.columns([2.2, 0.1, 1.1])
 
 with col_main:
-  # Cabecera visual limpia del enfrentamiento (sin emojis ni iconos)
+  # Cabecera visual limpia del enfrentamiento
   with st.container(border=True):
     col_l_img, col_vs, col_v_img = st.columns([1, 0.4, 1])
     with col_l_img:
@@ -139,6 +139,11 @@ with col_main:
       with st.container(border=True):
         st.markdown(f"**1. Hándicap (Spread)**")
 
+        st.write(f"- Modelo: **{spread_modelo_loc:+.2f} pts**")
+        st.write(
+            f"  *(Proyección Local: {pts_proyectados_loc:.1f} | Visitante:"
+            f" {pts_proyectados_vis:.1f})*"
+        )
         st.write(f"- Casino: **{linea_spread_casino:+.1f} pts**")
 
         margen_spread = spread_modelo_loc - linea_spread_casino
@@ -175,6 +180,7 @@ with col_main:
       with st.container(border=True):
         st.markdown(f"**2. Puntuación Total (O/U)**")
 
+        st.write(f"- Modelo: **{total_proyectado:.2f} pts**")
         st.write(f"- Casino: **{linea_total_casino:.1f} pts**")
 
         margen_total = total_proyectado - linea_total_casino
