@@ -25,13 +25,27 @@ df = pd.DataFrame(nba_teams)
 equipos = [team["full_name"] for team in nba_teams]
 
 
-# --- FUNCIÓN ESTRICTA PARA OBTENER DATOS REALES DE LA API ---
+# --- FUNCIÓN ESTRICTA PARA OBTENER DATOS REALES DE LA API (CON HEADERS Y TEMPORADA) ---
 @st.cache_data(ttl=3600)  # Caché de 1 hora
 def obtener_promedios_nba_estrictos():
   try:
-    # Solicitamos los datos tradicionales con un tiempo de espera más amplio (15 segundos) por si la API está lenta
+    # Cabeceras requeridas para evitar bloqueos por parte de stats.nba.com
+    custom_headers = {
+        'Host': 'stats.nba.com',
+        'Connection': 'keep-alive',
+        'Accept': 'application/json, text/plain, */*',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.nba.com/',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+    }
+    
+    # Solicitamos los datos especificando la temporada actual ('2026-27') y las cabeceras
     stats_tradicionales = leaguedashteamstats.LeagueDashTeamStats(
-        measure_type_base_defense="Base", timeout=15
+        season='2026-27',
+        season_type_all_star='Regular Season',
+        measure_type_base_defense='Base',
+        headers=custom_headers,
+        timeout=20
     )
     df_stats = stats_tradicionales.get_data_frame()
 
@@ -44,7 +58,6 @@ def obtener_promedios_nba_estrictos():
       }
     return promedios_dict
   except Exception as e:
-    # Si la API falla por completo, devolvemos un diccionario vacío (sin inventar números)
     return None
 
 
@@ -160,7 +173,7 @@ with col_main:
     with st.spinner("Conectando con la API oficial de la NBA para extraer estadísticas reales..."):
       dict_promedios = obtener_promedios_nba_estrictos()
 
-    # Validación estricta: si la API no devolvió datos, detenemos el proceso y avisamos
+    # Validación estricta
     if dict_promedios is None or loc_id not in dict_promedios or vis_id not in dict_promedios:
       st.error("⚠️ **Error de conexión con la API de la NBA:** No se pudieron obtener los datos reales en este momento. Por favor, intenta de nuevo en unos segundos.")
     else:
