@@ -172,7 +172,7 @@ with col_main:
         st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
 
     # --- ANÁLISIS DE VALOR Y MARGEN CON LOGOS PARA CAPTURA ---
-    st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
+    st.markdown("### 🎯 Decision NoCar Modelo")
 
     with st.container(border=True):
       banner_l, banner_mid, banner_v = st.columns([1, 0.2, 1])
@@ -188,7 +188,7 @@ with col_main:
       with banner_v:
         b_txt2, b_img2 = st.columns([0.75, 0.25])
         with b_txt2:
-          st.markdown(f"<div style='text-align: right;'>**{equipo_vis}**</div>", unsafe_allow_html=True)
+          st.markdown(f"<div style='text-align: right;'>{equipo_vis}</div>", unsafe_allow_html=True)
           st.caption("<div style='text-align: right;'>Visitante</div>", unsafe_allow_html=True)
         with b_img2:
           if vis_logo: st.image(vis_logo, width=35)
@@ -226,7 +226,7 @@ with col_main:
             st.success(
                 f"✅ **APUESTA RECOMENDADA:** **Ir con Hándicap a {equipo_local}**\n\n"
                 f"**Análisis:** Hay una ventaja de **+{abs(margen_spread):.2f} pts** a favor de nuestro modelo. "
-                f"Se recomienda ir con el hándicap de **{equipo_local}** frente a Las Vegas."
+                f"Se recomienda ir con el hándicap de **{equipo_local}**."
             )
           else:
             st.success(
