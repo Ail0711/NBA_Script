@@ -262,62 +262,61 @@ if df is not None:
 
       st.info(f"⚡ **Ritmo Estimado (Pace):** {pace_esperado:.2f} posesiones")
 
-      # --- ANÁLISIS DE VALOR Y MARGEN (EN DOS COLUMNAS) ---
-      st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
+      # --- ANÁLISIS DE VALOR Y MARGEN (TARJETAS PROFESIONALES) ---
+    st.markdown("### 🎯 Auditoría y Recomendación de Apuesta (+EV)")
 
-      col_mod1, col_mod2 = st.columns(2)
+    col_mod1, col_mod2 = st.columns(2)
 
-      with col_mod1:
-          with st.container(border=True):
-            st.markdown(f"**1. Hándicap (Spread)**")
-            margen_spread = spread_modelo_loc - linea_spread_casino
+    with col_mod1:
+      with st.container(border=True):
+        st.markdown(f"**1. Hándicap (Spread)**")
+        margen_spread = spread_modelo_loc - linea_spread_casino
 
-            st.write(f"- Modelo: **{spread_modelo_loc:+.2f}**")
-            st.write(f"- Casino: **{linea_spread_casino:+.1f}**")
-            st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
+        st.write(f"- Modelo: **{spread_modelo_loc:+.2f} pts**")
+        st.write(f"- Casino: **{linea_spread_casino:+.1f} pts**")
+        st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
 
-            if abs(margen_spread) >= 2.0:
-              if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
-                st.success(
-                    f"✅ **VALOR (COVER):** El casino pide que **{equipo_local}** "
-                    f"gane por más de {abs(linea_spread_casino)} pts, pero el modelo "
-                    f"proyecta una diferencia mayor. ¡Gran valor cubriendo el hándicap!"
-                    )
-              elif margen_spread > 0:
-                st.success(
-                    f"✅ **VALOR:** El modelo ve una diferencia favorable de "
-                    f"**+{abs(margen_spread):.2f} pts** respecto a la línea del casino."
-                )
-              else:
-                st.success(
-                    f"✅ **VALOR:** Ventaja detectada del lado visitante / rival. "
-                    f"Margen: **{abs(margen_spread):.2f} pts**."
-                )
-            else:
-              st.warning("⚠️ Sin margen suficiente (< 2 pts).")
-                
-      with col_mod2:
-        with st.container(border=True):
-          st.markdown(f"**2. Puntuación Total (O/U)**")
-          margen_total = total_proyectado - linea_total_casino
-
-          st.write(f"- Modelo: **{total_proyectado:.2f}**")
-          st.write(f"- Casino: **{linea_total_casino:.1f}**")
-          st.write(f"- **Edge:** `{margen_total:+.2f} pts`")
-
-          if abs(margen_total) >= 3.0:
-            if margen_total > 0:
-              st.success(
-                  f"📈 **Over (Altas):** Margen favorable de **+{margen_total:.2f}"
-                  f" pts** sobre el casino."
-              )
-            else:
-              st.error(
-                  f"📉 **Under (Bajas):** Margen favorable de"
-                  f" **-{abs(margen_total):.2f} pts** por debajo del casino."
-              )
+        if abs(margen_spread) >= 2.0:
+          if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
+            st.success(
+                f"✅ **LÍNEA A TOMAR:** **{equipo_local} ({linea_spread_casino:+.1f})**\n\n"
+                f"**Recomendación:** El modelo proyecta una paliza mayor a la exigida por el casino. ¡Excelente valor cubriendo el hándicap!"
+            )
+          elif margen_spread > 0:
+            st.success(
+                f"✅ **LÍNEA A TOMAR:** **{equipo_local}**\n\n"
+                f"**Recomendación:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente a Las Vegas."
+            )
           else:
-            st.warning("⚠️ Línea ajustada (< 3 pts). Sin valor claro.")
+            st.success(
+                f"✅ **LÍNEA A TOMAR:** **{equipo_vis} (Visitante)**\n\n"
+                f"**Recomendación:** Ventaja detectada del lado visitante. Margen: **{abs(margen_spread):.2f} pts**."
+            )
+        else:
+          st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 2 pts). Mejor evitar.")
+
+    with col_mod2:
+      with st.container(border=True):
+        st.markdown(f"**2. Puntuación Total (O/U)**")
+        margen_total = total_proyectado - linea_total_casino
+
+        st.write(f"- Modelo: **{total_proyectado:.2f} pts**")
+        st.write(f"- Casino: **{linea_total_casino:.1f} pts**")
+        st.write(f"- **Edge:** `{margen_total:+.2f} pts`")
+
+        if abs(margen_total) >= 3.0:
+          if margen_total > 0:
+            st.success(
+                f"📈 **LÍNEA A TOMAR:** **OVER (Altas) {linea_total_casino:.1f}**\n\n"
+                f"**Recomendación:** Margen favorable de **+{margen_total:.2f} pts** por encima del casino."
+            )
+          else:
+            st.error(
+                f"📉 **LÍNEA A TOMAR:** **UNDER (Bajas) {linea_total_casino:.1f}**\n\n"
+                f"**Recomendación:** Margen favorable de **-{abs(margen_total):.2f} pts** por debajo del casino."
+            )
+        else:
+          st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 3 pts). Mejor evitar.")
     else:
       st.info(
           "👈 Configura los equipos, las lesiones y las líneas en la **barra"
