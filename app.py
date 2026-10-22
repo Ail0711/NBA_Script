@@ -201,10 +201,17 @@ with col_main:
         st.markdown(f"**1. Hándicap (Spread)**")
         st.write(f"- Casino: **{linea_spread_casino:+.1f} pts**")
         
-        # Edge Informativo con desglose de cálculo
+        # Explicación conceptual del Edge (Spread)
+        if abs(margen_spread) >= 4.0:
+          desc_edge_spread = "Desajuste masivo vs Las Vegas (Alta confianza)"
+        elif abs(margen_spread) >= 2.0:
+          desc_edge_spread = "Ventaja sólida detectada (+EV viable)"
+        else:
+          desc_edge_spread = "Línea ajustada, el casino está acertado"
+
         st.markdown(
             f"- **Edge:** `{margen_spread:+.2f} pts`\n"
-            f"  *<small style='color: gray;'>Cálculo: (Modelo {spread_modelo_loc:+.2f}) - (Casino {linea_spread_casino:+.1f})</small>*",
+            f"  *<small style='color: gray;'>💡 {desc_edge_spread}</small>*",
             unsafe_allow_html=True
         )
 
@@ -233,10 +240,17 @@ with col_main:
         st.markdown(f"**2. Puntuación Total (O/U)**")
         st.write(f"- Casino: **{linea_total_casino:.1f} pts**")
         
-        # Edge Total Informativo con desglose
+        # Explicación conceptual del Edge (Total O/U)
+        if abs(margen_total) >= 5.0:
+          desc_edge_total = "Diferencia notable en ritmo/ofensiva proyectada"
+        elif abs(margen_total) >= 3.0:
+          desc_edge_total = "Margen aceptable por encima del filtro"
+        else:
+          desc_edge_total = "Línea de puntos muy bien estimada por el casino"
+
         st.markdown(
             f"- **Edge:** `{margen_total:+.2f} pts`\n"
-            f"  *<small style='color: gray;'>Cálculo: (Modelo {total_proyectado:.1f}) - (Casino {linea_total_casino:.1f})</small>*",
+            f"  *<small style='color: gray;'>💡 {desc_edge_total}</small>*",
             unsafe_allow_html=True
         )
 
