@@ -98,7 +98,7 @@ vis_logo = f"https://cdn.nba.com/logos/nba/{vis_id}/global/L/logo.svg" if vis_id
 col_main, col_spacer, col_right = st.columns([2.2, 0.1, 1.1])
 
 with col_main:
-  # Cabecera visual principal con alineación HTML perfecta (Logo grande y texto arriba)
+  # Cabecera visual unificada y perfectamente alineada con HTML puro
   with st.container(border=True):
     col_l_img, col_vs, col_v_img = st.columns([1, 0.3, 1])
     
@@ -181,27 +181,8 @@ with col_main:
       with m4:
         st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
 
-    # --- ANÁLISIS DE VALOR Y MARGEN CON LOGOS PARA CAPTURA ---
+    # --- ANÁLISIS DE VALOR Y MARGEN ---
     st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
-
-    with st.container(border=True):
-      banner_l, banner_mid, banner_v = st.columns([1, 0.2, 1])
-      with banner_l:
-        b_img1, b_txt1 = st.columns([0.25, 0.75])
-        with b_img1:
-          if loc_logo: st.image(loc_logo, width=35)
-        with b_txt1:
-          st.markdown(f"**{equipo_local}**")
-          st.caption("Local")
-      with banner_mid:
-        st.markdown("<div style='text-align: center; font-weight: bold; padding-top: 5px;'>VS</div>", unsafe_allow_html=True)
-      with banner_v:
-        b_txt2, b_img2 = st.columns([0.75, 0.25])
-        with b_txt2:
-          st.markdown(f"<div style='text-align: right; font-weight: bold;'>{equipo_vis}</div>", unsafe_allow_html=True)
-          st.caption("<div style='text-align: right;'>Visitante</div>", unsafe_allow_html=True)
-        with b_img2:
-          if vis_logo: st.image(vis_logo, width=35)
 
     col_mod1, col_mod2 = st.columns(2)
 
