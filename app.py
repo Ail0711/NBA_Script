@@ -16,8 +16,7 @@ st.markdown(
     "<h1>🏀 Simulador y Modelo Predictivo NBA (+EV)</h1>", unsafe_allow_html=True
 )
 st.markdown(
-    "Panel de control cuantitativo para análisis de valor y márgenes de"
-    " apuestas."
+    "Panel de control cuantitativo 100% analítico con datos reales de la API."
 )
 
 # --- CARGA DE EQUIPOS DE LA NBA ---
@@ -26,28 +25,27 @@ df = pd.DataFrame(nba_teams)
 equipos = [team["full_name"] for team in nba_teams]
 
 
-# --- FUNCIÓN PARA OBTENER RATINGS REALES DE LA API DE LA NBA ---
-@st.cache_data(ttl=3600)  # Caché de 1 hora para optimizar rendimiento y evitar timeouts
-def obtener_ratings_nba():
+# --- FUNCIÓN ESTRICTA PARA OBTENER DATOS REALES DE LA API ---
+@st.cache_data(ttl=3600)  # Caché de 1 hora
+def obtener_promedios_nba_estrictos():
   try:
-    # Consultamos estadísticas avanzadas de la temporada actual
-    advanced_stats = leaguedashteamstats.LeagueDashTeamStats(
-        measure_type_advanced="Advanced", timeout=10
+    # Solicitamos los datos tradicionales con un tiempo de espera más amplio (15 segundos) por si la API está lenta
+    stats_tradicionales = leaguedashteamstats.LeagueDashTeamStats(
+        measure_type_base_defense="Base", timeout=15
     )
-    df_advanced = advanced_stats.get_data_frame()
+    df_stats = stats_tradicionales.get_data_frame()
 
-    ratings_dict = {}
-    for _, row in df_advanced.iterrows():
+    promedios_dict = {}
+    for _, row in df_stats.iterrows():
       team_id = row["TEAM_ID"]
-      ratings_dict[team_id] = {
-          "off_rtg": row["OFF_RTG"],  # Rating Ofensivo real
-          "def_rtg": row["DEF_RTG"],  # Rating Defensivo real
-          "pace": row["PACE"],  # Ritmo de juego real
+      promedios_dict[team_id] = {
+          "pts_favor": row["PTS"],  # Promedio real de puntos anotados por partido
+          "gp": row["GP"],  # Partidos jugados
       }
-    return ratings_dict
+    return promedios_dict
   except Exception as e:
-    # Diccionario vacío de respaldo en caso de fallo de red
-    return {}
+    # Si la API falla por completo, devolvemos un diccionario vacío (sin inventar números)
+    return None
 
 
 # --- BARRA LATERAL: CONFIGURACIÓN DEL PARTIDO ---
@@ -159,175 +157,179 @@ with col_main:
       )
 
   if calcular:
-    # --- EXTRACCIÓN DINÁMICA DE RATINGS REALES (API NBA) ---
-    dict_ratings = obtener_ratings_nba()
+    with st.spinner("Conectando con la API oficial de la NBA para extraer estadísticas reales..."):
+      dict_promedios = obtener_promedios_nba_estrictos()
 
-    # Asignación basada en datos reales de la temporada o respaldos estándar
-    rating_base_local = dict_ratings.get(loc_id, {}).get('off_rtg', 114.0)
-    rating_base_vis = dict_ratings.get(vis_id, {}).get('off_rtg', 112.0)
+    # Validación estricta: si la API no devolvió datos, detenemos el proceso y avisamos
+    if dict_promedios is None or loc_id not in dict_promedios or vis_id not in dict_promedios:
+      st.error("⚠️ **Error de conexión con la API de la NBA:** No se pudieron obtener los datos reales en este momento. Por favor, intenta de nuevo en unos segundos.")
+    else:
+      # Extracción estricta 100% real de la temporada actual
+      rating_base_local = dict_promedios[loc_id]["pts_favor"]
+      rating_base_vis = dict_promedios[vis_id]["pts_favor"]
 
-    # --- SIMULACIÓN DEL MODELO CUANTITATIVO ---
-    penalizacion_b2b = 2.5
-    penalizacion_top = 4.5
-    penalizacion_star = 2.5
-    penalizacion_role = 1.2
+      # --- SIMULACIÓN DEL MODELO CUANTITATIVO ---
+      penalizacion_b2b = 2.5
+      penalizacion_top = 4.5
+      penalizacion_star = 2.5
+      penalizacion_role = 1.2
 
-    ajuste_local = (
-        2.5
-        - (penalizacion_b2b if b2b_local else 0)
-        - (lesion_top_local * penalizacion_top)
-        - (lesion_star_local * penalizacion_star)
-        - (lesion_role_local * penalizacion_role)
-    )
+      ajuste_local = (
+          2.5
+          - (penalizacion_b2b if b2b_local else 0)
+          - (lesion_top_local * penalizacion_top)
+          - (lesion_star_local * penalizacion_star)
+          - (lesion_role_local * penalizacion_role)
+      )
 
-    ajuste_vis = (
-        - (penalizacion_b2b if b2b_vis else 0)
-        - (lesion_top_vis * penalizacion_top)
-        - (lesion_star_vis * penalizacion_star)
-        - (lesion_role_vis * penalizacion_role)
-    )
+      ajuste_vis = (
+          - (penalizacion_b2b if b2b_vis else 0)
+          - (lesion_top_vis * penalizacion_top)
+          - (lesion_star_vis * penalizacion_star)
+          - (lesion_role_vis * penalizacion_role)
+      )
 
-    pts_proyectados_loc = rating_base_local + ajuste_local
-    pts_proyectados_vis = rating_base_vis + ajuste_vis
+      pts_proyectados_loc = rating_base_local + ajuste_local
+      pts_proyectados_vis = rating_base_vis + ajuste_vis
 
-    spread_modelo_loc = pts_proyectados_loc - pts_proyectados_vis
-    total_proyectado = pts_proyectados_loc + pts_proyectados_vis
+      spread_modelo_loc = pts_proyectados_loc - pts_proyectados_vis
+      total_proyectado = pts_proyectados_loc + pts_proyectados_vis
 
-    margen_spread = spread_modelo_loc - linea_spread_casino
-    margen_total = total_proyectado - linea_total_casino
+      margen_spread = spread_modelo_loc - linea_spread_casino
+      margen_total = total_proyectado - linea_total_casino
 
-    # --- MÉTRICAS PRINCIPALES EN BLOQUE HORIZONTAL ---
-    st.markdown("### 📊 Desglose de Proyecciones del Modelo")
-    
-    with st.container(border=True):
-      m1, m2, m3, m4 = st.columns(4)
-      with m1:
-        st.metric(label="Proyección Local", value=f"{pts_proyectados_loc:.1f} pts")
-      with m2:
-        st.metric(label="Proyección Visitante", value=f"{pts_proyectados_vis:.1f} pts")
-      with m3:
-        st.metric(label="Spread Modelo", value=f"{spread_modelo_loc:+.2f}")
-      with m4:
-        st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
-
-    # --- ANÁLISIS DE VALOR Y MARGEN CON LA CABECERA REPLICADA ---
-    st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
-
-    with st.container(border=True):
-      col_l_img2, col_vs2, col_v_img2 = st.columns([1, 0.3, 1])
+      # --- MÉTRICAS PRINCIPALES EN BLOQUE HORIZONTAL ---
+      st.markdown("### 📊 Desglose de Proyecciones del Modelo")
       
-      with col_l_img2:
-        st.markdown(
-            f"""
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <img src="{loc_logo}" width="55" style="display: block;">
-                <div>
-                    <h4 style="margin: 0; padding: 0;">{equipo_local}</h4>
-                    <p style="margin: 0; padding: 0; color: gray; font-size: 0.85rem;">Local (🏠)</p>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+      with st.container(border=True):
+        m1, m2, m3, m4 = st.columns(4)
+        with m1:
+          st.metric(label="Proyección Local", value=f"{pts_proyectados_loc:.1f} pts")
+        with m2:
+          st.metric(label="Proyección Visitante", value=f"{pts_proyectados_vis:.1f} pts")
+        with m3:
+          st.metric(label="Spread Modelo", value=f"{spread_modelo_loc:+.2f}")
+        with m4:
+          st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
+
+      # --- ANÁLISIS DE VALOR Y MARGEN CON LA CABECERA REPLICADA ---
+      st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
+
+      with st.container(border=True):
+        col_l_img2, col_vs2, col_v_img2 = st.columns([1, 0.3, 1])
+        
+        with col_l_img2:
+          st.markdown(
+              f"""
+              <div style="display: flex; align-items: center; gap: 15px;">
+                  <img src="{loc_logo}" width="55" style="display: block;">
+                  <div>
+                      <h4 style="margin: 0; padding: 0;">{equipo_local}</h4>
+                      <p style="margin: 0; padding: 0; color: gray; font-size: 0.85rem;">Local (🏠)</p>
+                  </div>
+              </div>
+              """,
+              unsafe_allow_html=True
+          )
+            
+        with col_vs2:
+          st.markdown("<h3 style='text-align: center; padding-top: 5px;'>VS</h3>", unsafe_allow_html=True)
           
-      with col_vs2:
-        st.markdown("<h3 style='text-align: center; padding-top: 5px;'>VS</h3>", unsafe_allow_html=True)
-        
-      with col_v_img2:
-        st.markdown(
-            f"""
-            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 15px;">
-                <div style="text-align: right;">
-                    <h4 style="margin: 0; padding: 0;">{equipo_vis}</h4>
-                    <p style="margin: 0; padding: 0; color: gray; font-size: 0.85rem;">Visitante (✈️)</p>
-                </div>
-                <img src="{vis_logo}" width="55" style="display: block;">
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        with col_v_img2:
+          st.markdown(
+              f"""
+              <div style="display: flex; align-items: center; justify-content: flex-end; gap: 15px;">
+                  <div style="text-align: right;">
+                      <h4 style="margin: 0; padding: 0;">{equipo_vis}</h4>
+                      <p style="margin: 0; padding: 0; color: gray; font-size: 0.85rem;">Visitante (✈️)</p>
+                  </div>
+                  <img src="{vis_logo}" width="55" style="display: block;">
+              </div>
+              """,
+              unsafe_allow_html=True
+          )
 
-    col_mod1, col_mod2 = st.columns(2)
+      col_mod1, col_mod2 = st.columns(2)
 
-    # --- MÓDULO 1: HÁNDICAP (SPREAD) ---
-    with col_mod1:
-      with st.container(border=True, height=355):
-        st.markdown(f"**1. Hándicap (Spread)**")
-        st.markdown(f"- Línea del Casino: **{linea_spread_casino:+.1f} pts**")
-        
-        if abs(margen_spread) >= 4.0:
-          desc_edge_spread = "Desajuste masivo vs Las Vegas"
-        elif abs(margen_spread) >= 2.0:
-          desc_edge_spread = "Ventaja sólida detectada (+EV)"
-        else:
-          desc_edge_spread = "Línea ajustada, casino acertado"
-
-        st.markdown(
-            f"- **Ventaja Modelo:** `{margen_spread:+.2f} pts`\n"
-            f"  *<small style='color: gray;'>💡 {desc_edge_spread}</small>*",
-            unsafe_allow_html=True
-        )
-        
-        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-
-        if abs(margen_spread) >= 2.0:
-          if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
-            st.success(
-                f"✅ **APUESTA RECOMENDADA:**\n"
-                f"Hándicap a {equipo_local} ({linea_spread_casino:+.1f})\n\n"
-                f"**Análisis:** Superarán la línea del casino."
-            )
-          elif margen_spread > 0:
-            st.success(
-                f"✅ **APUESTA RECOMENDADA:**\n"
-                f"Hándicap a {equipo_local}\n\n"
-                f"**Análisis:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente a Las Vegas."
-            )
+      # --- MÓDULO 1: HÁNDICAP (SPREAD) ---
+      with col_mod1:
+        with st.container(border=True, height=355):
+          st.markdown(f"**1. Hándicap (Spread)**")
+          st.markdown(f"- Línea del Casino: **{linea_spread_casino:+.1f} pts**")
+          
+          if abs(margen_spread) >= 4.0:
+            desc_edge_spread = "Desajuste masivo vs Las Vegas"
+          elif abs(margen_spread) >= 2.0:
+            desc_edge_spread = "Ventaja sólida detectada (+EV)"
           else:
-            st.success(
-                f"✅ **APUESTA RECOMENDADA:**\n"
-                f"Hándicap a {equipo_vis} (Visitante)\n\n"
-                f"**Análisis:** Ventaja visitante de **{abs(margen_spread):.2f} pts**."
-            )
-        else:
-          st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 2 pts).")
+            desc_edge_spread = "Línea ajustada, casino acertado"
 
-    # --- MÓDULO 2: PUNTUACIÓN TOTAL (O/U) ---
-    with col_mod2:
-      with st.container(border=True, height=355):
-        st.markdown(f"**2. Puntuación Total (O/U)**")
-        st.markdown(f"- Línea del Casino: **{linea_total_casino:.1f} pts**")
-        
-        if abs(margen_total) >= 5.0:
-          desc_edge_total = "Diferencia notable en ritmo proyectado"
-        elif abs(margen_total) >= 3.0:
-          desc_edge_total = "Margen aceptable sobre el filtro"
-        else:
-          desc_edge_total = "Línea de puntos muy bien estimada"
+          st.markdown(
+              f"- **Ventaja Modelo:** `{margen_spread:+.2f} pts`\n"
+              f"  *<small style='color: gray;'>💡 {desc_edge_spread}</small>*",
+              unsafe_allow_html=True
+          )
+          
+          st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
 
-        st.markdown(
-            f"- **Ventaja Modelo:** `{margen_total:+.2f} pts`\n"
-            f"  *<small style='color: gray;'>💡 {desc_edge_total}</small>*",
-            unsafe_allow_html=True
-        )
-        
-        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-
-        if abs(margen_total) >= 3.0:
-          if margen_total > 0:
-            st.success(
-                f"📈 **APUESTA RECOMENDADA:**\n"
-                f"OVER (Altas) {linea_total_casino:.1f}\n\n"
-                f"**Análisis:** Margen favorable de **+{margen_total:.2f} pts** por encima del casino."
-            )
+          if abs(margen_spread) >= 2.0:
+            if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
+              st.success(
+                  f"✅ **APUESTA RECOMENDADA:**\n"
+                  f"Hándicap a {equipo_local} ({linea_spread_casino:+.1f})\n\n"
+                  f"**Análisis:** Superarán la línea del casino."
+              )
+            elif margen_spread > 0:
+              st.success(
+                  f"✅ **APUESTA RECOMENDADA:**\n"
+                  f"Hándicap a {equipo_local}\n\n"
+                  f"**Análisis:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente a Las Vegas."
+              )
+            else:
+              st.success(
+                  f"✅ **APUESTA RECOMENDADA:**\n"
+                  f"Hándicap a {equipo_vis} (Visitante)\n\n"
+                  f"**Análisis:** Ventaja visitante de **{abs(margen_spread):.2f} pts**."
+              )
           else:
-            st.error(
-                f"📉 **APUESTA RECOMENDADA:**\n"
-                f"UNDER (Bajas) {linea_total_casino:.1f}\n\n"
-                f"**Análisis:** Margen favorable de **-{abs(margen_total):.2f} pts** por debajo del casino."
-            )
-        else:
-          st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 3 pts).")
+            st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 2 pts).")
+
+      # --- MÓDULO 2: PUNTUACIÓN TOTAL (O/U) ---
+      with col_mod2:
+        with st.container(border=True, height=355):
+          st.markdown(f"**2. Puntuación Total (O/U)**")
+          st.markdown(f"- Línea del Casino: **{linea_total_casino:.1f} pts**")
+          
+          if abs(margen_total) >= 5.0:
+            desc_edge_total = "Diferencia notable en ritmo proyectado"
+          elif abs(margen_total) >= 3.0:
+            desc_edge_total = "Margen aceptable sobre el filtro"
+          else:
+            desc_edge_total = "Línea de puntos muy bien estimada"
+
+          st.markdown(
+              f"- **Ventaja Modelo:** `{margen_total:+.2f} pts`\n"
+              f"  *<small style='color: gray;'>💡 {desc_edge_total}</small>*",
+              unsafe_allow_html=True
+          )
+          
+          st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+
+          if abs(margen_total) >= 3.0:
+            if margen_total > 0:
+              st.success(
+                  f"📈 **APUESTA RECOMENDADA:**\n"
+                  f"OVER (Altas) {linea_total_casino:.1f}\n\n"
+                  f"**Análisis:** Margen favorable de **+{margen_total:.2f} pts** por encima del casino."
+              )
+            else:
+              st.error(
+                  f"📉 **APUESTA RECOMENDADA:**\n"
+                  f"UNDER (Bajas) {linea_total_casino:.1f}\n\n"
+                  f"**Análisis:** Margen favorable de **-{abs(margen_total):.2f} pts** por debajo del casino."
+              )
+          else:
+            st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 3 pts).")
   else:
     st.info(
         "👉 Configura los equipos, las lesiones y las líneas en la **barra"
