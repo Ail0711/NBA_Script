@@ -328,14 +328,15 @@ if df is not None:
   with col_spacer:
     st.write("")
 
-  # --- PANEL DERECHO: PARTIDOS DE HOY (ROBUSTO CON DF) ---
+  # --- PANEL DERECHO: PARTIDOS DE HOY (CORREGIDO) ---
   with col_right:
     with st.container(border=True):
       st.subheader("📅 Partidos de Hoy")
       st.caption("Cartelera oficial en tiempo real")
 
       try:
-        hoy_str = datetime.today().strftime("%m/%d/%Y")
+        # Formato correcto que exige la API de la NBA: YYYY-MM-DD
+        hoy_str = datetime.today().strftime("%Y-%m-%d")
         board = scoreboardv2.ScoreboardV2(game_date=hoy_str)
         headers = board.game_header.get_data_frame()
 
@@ -345,7 +346,6 @@ if df is not None:
             home_id = row.get("HOME_TEAM_ID")
             vis_id = row.get("VISITOR_TEAM_ID")
             
-            # Buscamos los nombres directamente en nuestro DataFrame principal
             home_row = df[df['TEAM_ID'] == home_id]
             vis_row = df[df['TEAM_ID'] == vis_id]
             
@@ -356,9 +356,9 @@ if df is not None:
             st.caption(f"Estado: {status}")
             st.markdown("---")
         else:
-          st.info(f"No hay encuentros programados en la cartelera oficial para hoy ({datetime.today().strftime('%d/%m/%Y')}).")
+          st.info(f"No hay encuentros programados en la cartelera oficial para hoy.")
           
       except Exception as e:
-        st.warning(f"Sincronizando cartelera en vivo...")
+        st.warning(f"Error al sincronizar: {e}")
 else:
   st.error("No se pudieron cargar los datos de la NBA.")
