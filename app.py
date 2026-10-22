@@ -98,19 +98,30 @@ vis_logo = f"https://cdn.nba.com/logos/nba/{vis_id}/global/L/logo.svg" if vis_id
 col_main, col_spacer, col_right = st.columns([2.2, 0.1, 1.1])
 
 with col_main:
-  # Cabecera visual del enfrentamiento con logos oficiales
+  # Cabecera visual optimizada y horizontal sin espacios feos
   with st.container(border=True):
-    col_l_img, col_vs, col_v_img = st.columns([1, 0.4, 1])
+    col_l_img, col_vs, col_v_img = st.columns([1, 0.3, 1])
+    
     with col_l_img:
-      if loc_logo:
-        st.image(loc_logo, width=70)
-      st.markdown(f"### {equipo_local}")
+      sub_img_l, sub_txt_l = st.columns([0.3, 0.7])
+      with sub_img_l:
+        if loc_logo:
+          st.image(loc_logo, width=55)
+      with sub_txt_l:
+        st.markdown(f"#### {equipo_local}")
+        st.caption("Local (🏠)")
+        
     with col_vs:
-      st.markdown("<h2 style='text-align: center; padding-top: 20px;'>VS</h2>", unsafe_allow_html=True)
+      st.markdown("<h3 style='text-align: center; padding-top: 10px;'>VS</h3>", unsafe_allow_html=True)
+      
     with col_v_img:
-      if vis_logo:
-        st.image(vis_logo, width=70)
-      st.markdown(f"### {equipo_vis}")
+      sub_txt_v, sub_img_v = st.columns([0.7, 0.3])
+      with sub_txt_v:
+        st.markdown(f"#### {equipo_vis}")
+        st.caption("Visitante (✈️)")
+      with sub_img_v:
+        if vis_logo:
+          st.image(vis_logo, width=55)
 
   if calcular:
     # --- SIMULACIÓN DEL MODELO CUANTITATIVO ---
