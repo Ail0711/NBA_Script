@@ -98,15 +98,16 @@ vis_logo = f"https://cdn.nba.com/logos/nba/{vis_id}/global/L/logo.svg" if vis_id
 col_main, col_spacer, col_right = st.columns([2.2, 0.1, 1.1])
 
 with col_main:
-  # Cabecera visual principal
+  # Cabecera visual principal con logo más grande y alineado
   with st.container(border=True):
     col_l_img, col_vs, col_v_img = st.columns([1, 0.3, 1])
     
     with col_l_img:
-      sub_img_l, sub_txt_l = st.columns([0.3, 0.7])
+      sub_img_l, sub_txt_l = st.columns([0.22, 0.78])
       with sub_img_l:
         if loc_logo:
-          st.image(loc_logo, width=55)
+          st.markdown("<div style='padding-top: 8px;'></div>", unsafe_allow_html=True)
+          st.image(loc_logo, width=42)
       with sub_txt_l:
         st.markdown(f"#### {equipo_local}")
         st.caption("Local (🏠)")
@@ -115,13 +116,16 @@ with col_main:
       st.markdown("<h3 style='text-align: center; padding-top: 10px;'>VS</h3>", unsafe_allow_html=True)
       
     with col_v_img:
-      sub_txt_v, sub_img_v = st.columns([0.7, 0.3])
+      sub_txt_v, sub_img_v = st.columns([0.78, 0.22])
       with sub_txt_v:
-        st.markdown(f"#### {equipo_vis}")
+        st.markdown(f"<div style='text-align: right;'>#### {equipo_vis}</div>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
         st.caption("Visitante (✈️)")
+        st.markdown("</div>", unsafe_allow_html=True)
       with sub_img_v:
         if vis_logo:
-          st.image(vis_logo, width=55)
+          st.markdown("<div style='padding-top: 8px;'></div>", unsafe_allow_html=True)
+          st.image(vis_logo, width=42)
 
   if calcular:
     # --- SIMULACIÓN DEL MODELO CUANTITATIVO ---
@@ -172,7 +176,7 @@ with col_main:
         st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
 
     # --- ANÁLISIS DE VALOR Y MARGEN CON LOGOS PARA CAPTURA ---
-    st.markdown("### 🎯 Decision Modelo NoCar")
+    st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
 
     with st.container(border=True):
       banner_l, banner_mid, banner_v = st.columns([1, 0.2, 1])
@@ -202,7 +206,7 @@ with col_main:
         st.markdown(f"- Línea del Casino: **{linea_spread_casino:+.1f} pts**")
         
         if abs(margen_spread) >= 4.0:
-          desc_edge_spread = "Desajuste masivo vs el Casino"
+          desc_edge_spread = "Desajuste masivo vs Las Vegas"
         elif abs(margen_spread) >= 2.0:
           desc_edge_spread = "Ventaja sólida detectada (+EV)"
         else:
@@ -227,7 +231,7 @@ with col_main:
             st.success(
                 f"✅ **APUESTA RECOMENDADA:**\n"
                 f"Hándicap a {equipo_local}\n\n"
-                f"**Análisis:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente al Casino."
+                f"**Análisis:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente a Las Vegas."
             )
           else:
             st.success(
