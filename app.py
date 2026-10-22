@@ -98,34 +98,40 @@ vis_logo = f"https://cdn.nba.com/logos/nba/{vis_id}/global/L/logo.svg" if vis_id
 col_main, col_spacer, col_right = st.columns([2.2, 0.1, 1.1])
 
 with col_main:
-  # Cabecera visual principal con logo más grande y alineado
+  # Cabecera visual principal con alineación HTML perfecta (Logo grande y texto arriba)
   with st.container(border=True):
     col_l_img, col_vs, col_v_img = st.columns([1, 0.3, 1])
     
     with col_l_img:
-      sub_img_l, sub_txt_l = st.columns([0.22, 0.78])
-      with sub_img_l:
-        if loc_logo:
-          st.markdown("<div style='padding-top: 8px;'></div>", unsafe_allow_html=True)
-          st.image(loc_logo, width=42)
-      with sub_txt_l:
-        st.markdown(f"#### {equipo_local}")
-        st.caption("Local (🏠)")
+      st.markdown(
+          f"""
+          <div style="display: flex; align-items: center; gap: 15px;">
+              <img src="{loc_logo}" width="55" style="display: block;">
+              <div>
+                  <h4 style="margin: 0; padding: 0;">{equipo_local}</h4>
+                  <p style="margin: 0; padding: 0; color: gray; font-size: 0.85rem;">Local (🏠)</p>
+              </div>
+          </div>
+          """,
+          unsafe_allow_html=True
+      )
         
     with col_vs:
-      st.markdown("<h3 style='text-align: center; padding-top: 10px;'>VS</h3>", unsafe_allow_html=True)
+      st.markdown("<h3 style='text-align: center; padding-top: 5px;'>VS</h3>", unsafe_allow_html=True)
       
     with col_v_img:
-      sub_txt_v, sub_img_v = st.columns([0.78, 0.22])
-      with sub_txt_v:
-        st.markdown(f"<div style='text-align: right;'>#### {equipo_vis}</div>", unsafe_allow_html=True)
-        st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
-        st.caption("Visitante (✈️)")
-        st.markdown("</div>", unsafe_allow_html=True)
-      with sub_img_v:
-        if vis_logo:
-          st.markdown("<div style='padding-top: 8px;'></div>", unsafe_allow_html=True)
-          st.image(vis_logo, width=42)
+      st.markdown(
+          f"""
+          <div style="display: flex; align-items: center; justify-content: flex-end; gap: 15px;">
+              <div style="text-align: right;">
+                  <h4 style="margin: 0; padding: 0;">{equipo_vis}</h4>
+                  <p style="margin: 0; padding: 0; color: gray; font-size: 0.85rem;">Visitante (✈️)</p>
+              </div>
+              <img src="{vis_logo}" width="55" style="display: block;">
+          </div>
+          """,
+          unsafe_allow_html=True
+      )
 
   if calcular:
     # --- SIMULACIÓN DEL MODELO CUANTITATIVO ---
