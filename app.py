@@ -172,7 +172,7 @@ with col_main:
         st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
 
     # --- ANÁLISIS DE VALOR Y MARGEN CON LOGOS PARA CAPTURA ---
-    st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
+    st.markdown("### 🎯 Decision Modelo NoCar")
 
     with st.container(border=True):
       banner_l, banner_mid, banner_v = st.columns([1, 0.2, 1])
