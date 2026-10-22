@@ -98,7 +98,7 @@ vis_logo = f"https://cdn.nba.com/logos/nba/{vis_id}/global/L/logo.svg" if vis_id
 col_main, col_spacer, col_right = st.columns([2.2, 0.1, 1.1])
 
 with col_main:
-  # Cabecera visual unificada y perfectamente alineada con HTML puro
+  # Cabecera visual principal superior
   with st.container(border=True):
     col_l_img, col_vs, col_v_img = st.columns([1, 0.3, 1])
     
@@ -181,8 +181,42 @@ with col_main:
       with m4:
         st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
 
-    # --- ANÁLISIS DE VALOR Y MARGEN ---
+    # --- ANÁLISIS DE VALOR Y MARGEN CON LA CABECERA REPLICADA ---
     st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
+
+    with st.container(border=True):
+      col_l_img2, col_vs2, col_v_img2 = st.columns([1, 0.3, 1])
+      
+      with col_l_img2:
+        st.markdown(
+            f"""
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="{loc_logo}" width="55" style="display: block;">
+                <div>
+                    <h4 style="margin: 0; padding: 0;">{equipo_local}</h4>
+                    <p style="margin: 0; padding: 0; color: gray; font-size: 0.85rem;">Local (🏠)</p>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+          
+      with col_vs2:
+        st.markdown("<h3 style='text-align: center; padding-top: 5px;'>VS</h3>", unsafe_allow_html=True)
+        
+      with col_v_img2:
+        st.markdown(
+            f"""
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 15px;">
+                <div style="text-align: right;">
+                    <h4 style="margin: 0; padding: 0;">{equipo_vis}</h4>
+                    <p style="margin: 0; padding: 0; color: gray; font-size: 0.85rem;">Visitante (✈️)</p>
+                </div>
+                <img src="{vis_logo}" width="55" style="display: block;">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     col_mod1, col_mod2 = st.columns(2)
 
@@ -323,4 +357,3 @@ with col_right:
           "El modelo funciona al 100% con tu base local. Intenta recargar en"
           " unos minutos."
       )
-
