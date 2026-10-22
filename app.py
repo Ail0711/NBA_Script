@@ -88,7 +88,7 @@ calcular = st.sidebar.button(
 col_main, col_spacer, col_right = st.columns([2.2, 0.1, 1.1])
 
 with col_main:
-  # Cabecera visual limpia del enfrentamiento
+  # Cabecera visual del enfrentamiento
   with st.container(border=True):
     col_l_img, col_vs, col_v_img = st.columns([1, 0.4, 1])
     with col_l_img:
@@ -129,6 +129,23 @@ with col_main:
     spread_modelo_loc = pts_proyectados_loc - pts_proyectados_vis
     total_proyectado = pts_proyectados_loc + pts_proyectados_vis
 
+    margen_spread = spread_modelo_loc - linea_spread_casino
+    margen_total = total_proyectado - linea_total_casino
+
+    # --- MÉTRICAS PRINCIPALES EN BLOQUE HORIZONTAL (ESTILO NUEVO) ---
+    st.markdown("### 📊 Desglose de Proyecciones del Modelo")
+    
+    with st.container(border=True):
+      m1, m2, m3, m4 = st.columns(4)
+      with m1:
+        st.metric(label="Proyección Local", value=f"{pts_proyectados_loc:.1f} pts")
+      with m2:
+        st.metric(label="Proyección Visitante", value=f"{pts_proyectados_vis:.1f} pts")
+      with m3:
+        st.metric(label="Spread Modelo", value=f"{spread_modelo_loc:+.2f}")
+      with m4:
+        st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
+
     # --- ANÁLISIS DE VALOR Y MARGEN (EN DOS COLUMNAS) ---
     st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
 
@@ -138,15 +155,7 @@ with col_main:
     with col_mod1:
       with st.container(border=True):
         st.markdown(f"**1. Hándicap (Spread)**")
-
-        st.write(f"- Modelo: **{spread_modelo_loc:+.2f} pts**")
-        st.write(
-            f"  *(Proyección Local: {pts_proyectados_loc:.1f} | Visitante:"
-            f" {pts_proyectados_vis:.1f})*"
-        )
         st.write(f"- Casino: **{linea_spread_casino:+.1f} pts**")
-
-        margen_spread = spread_modelo_loc - linea_spread_casino
         st.write(f"- **Edge:** `{margen_spread:+.2f} pts`")
 
         if abs(margen_spread) >= 2.0:
@@ -179,11 +188,7 @@ with col_main:
     with col_mod2:
       with st.container(border=True):
         st.markdown(f"**2. Puntuación Total (O/U)**")
-
-        st.write(f"- Modelo: **{total_proyectado:.2f} pts**")
         st.write(f"- Casino: **{linea_total_casino:.1f} pts**")
-
-        margen_total = total_proyectado - linea_total_casino
         st.write(f"- **Edge:** `{margen_total:+.2f} pts`")
 
         if abs(margen_total) >= 3.0:
