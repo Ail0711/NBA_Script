@@ -1,7 +1,7 @@
 from datetime import datetime
 import numpy as np
 import pandas as pd
-from nba_api.stats.endpoints import scoreboardv2
+from nba_api.stats.endpoints import leaguedashteamstats, scoreboardv2
 from nba_api.stats.static import teams
 import streamlit as st
 
@@ -24,6 +24,31 @@ st.markdown(
 nba_teams = teams.get_teams()
 df = pd.DataFrame(nba_teams)
 equipos = [team["full_name"] for team in nba_teams]
+
+
+# --- FUNCIÓN PARA OBTENER RATINGS REALES DE LA API DE LA NBA ---
+@st.cache_data(ttl=3600)  # Caché de 1 hora para optimizar rendimiento y evitar timeouts
+def obtener_ratings_nba():
+  try:
+    # Consultamos estadísticas avanzadas de la temporada actual
+    advanced_stats = leaguedashteamstats.LeagueDashTeamStats(
+        measure_type_advanced="Advanced", timeout=10
+    )
+    df_advanced = advanced_stats.get_data_frame()
+
+    ratings_dict = {}
+    for _, row in df_advanced.iterrows():
+      team_id = row["TEAM_ID"]
+      ratings_dict[team_id] = {
+          "off_rtg": row["OFF_RTG"],  # Rating Ofensivo real
+          "def_rtg": row["DEF_RTG"],  # Rating Defensivo real
+          "pace": row["PACE"],  # Ritmo de juego real
+      }
+    return ratings_dict
+  except Exception as e:
+    # Diccionario vacío de respaldo en caso de fallo de red
+    return {}
+
 
 # --- BARRA LATERAL: CONFIGURACIÓN DEL PARTIDO ---
 st.sidebar.markdown("## ⚙️ Configuración del Partido")
@@ -134,10 +159,14 @@ with col_main:
       )
 
   if calcular:
-    # --- SIMULACIÓN DEL MODELO CUANTITATIVO ---
-    rating_base_local = 114.5
-    rating_base_vis = 112.0
+    # --- EXTRACCIÓN DINÁMICA DE RATINGS REALES (API NBA) ---
+    dict_ratings = obtener_ratings_nba()
 
+    # Asignación basada en datos reales de la temporada o respaldos estándar
+    rating_base_local = dict_ratings.get(loc_id, {}).get('off_rtg', 114.0)
+    rating_base_vis = dict_ratings.get(vis_id, {}).get('off_rtg', 112.0)
+
+    # --- SIMULACIÓN DEL MODELO CUANTITATIVO ---
     penalizacion_b2b = 2.5
     penalizacion_top = 4.5
     penalizacion_star = 2.5
@@ -182,7 +211,7 @@ with col_main:
         st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
 
     # --- ANÁLISIS DE VALOR Y MARGEN CON LA CABECERA REPLICADA ---
-    st.markdown("### 🎯 Decision Modelo NoCar")
+    st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
 
     with st.container(border=True):
       col_l_img2, col_vs2, col_v_img2 = st.columns([1, 0.3, 1])
@@ -227,7 +256,7 @@ with col_main:
         st.markdown(f"- Línea del Casino: **{linea_spread_casino:+.1f} pts**")
         
         if abs(margen_spread) >= 4.0:
-          desc_edge_spread = "Desajuste masivo vs el Casino"
+          desc_edge_spread = "Desajuste masivo vs Las Vegas"
         elif abs(margen_spread) >= 2.0:
           desc_edge_spread = "Ventaja sólida detectada (+EV)"
         else:
@@ -252,7 +281,7 @@ with col_main:
             st.success(
                 f"✅ **APUESTA RECOMENDADA:**\n"
                 f"Hándicap a {equipo_local}\n\n"
-                f"**Análisis:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente al Casino."
+                f"**Análisis:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente a Las Vegas."
             )
           else:
             st.success(
