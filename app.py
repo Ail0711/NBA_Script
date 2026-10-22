@@ -88,15 +88,15 @@ calcular = st.sidebar.button(
 col_main, col_spacer, col_right = st.columns([2.2, 0.1, 1.1])
 
 with col_main:
-  # Cabecera visual del enfrentamiento
+  # Cabecera visual limpia del enfrentamiento (sin emojis ni iconos)
   with st.container(border=True):
     col_l_img, col_vs, col_v_img = st.columns([1, 0.4, 1])
     with col_l_img:
-      st.markdown(f"### 🏠 {equipo_local}")
+      st.markdown(f"### {equipo_local}")
     with col_vs:
       st.markdown("### VS")
     with col_v_img:
-      st.markdown(f"### ✈️ {equipo_vis}")
+      st.markdown(f"### {equipo_vis}")
 
   if calcular:
     # --- SIMULACIÓN DEL MODELO CUANTITATIVO ---
@@ -139,7 +139,6 @@ with col_main:
       with st.container(border=True):
         st.markdown(f"**1. Hándicap (Spread)**")
 
-        st.write(f"- Modelo: **{spread_modelo_loc:+.2f} pts**")
         st.write(f"- Casino: **{linea_spread_casino:+.1f} pts**")
 
         margen_spread = spread_modelo_loc - linea_spread_casino
@@ -176,7 +175,6 @@ with col_main:
       with st.container(border=True):
         st.markdown(f"**2. Puntuación Total (O/U)**")
 
-        st.write(f"- Modelo: **{total_proyectado:.2f} pts**")
         st.write(f"- Casino: **{linea_total_casino:.1f} pts**")
 
         margen_total = total_proyectado - linea_total_casino
