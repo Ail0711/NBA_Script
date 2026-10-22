@@ -328,35 +328,49 @@ if df is not None:
   with col_spacer:
     st.write("")
 
+  # --- PANEL DERECHO: PARTIDOS DE HOY (AUTOMÁTICO) ---
   with col_right:
     with st.container(border=True):
       st.subheader("📅 Partidos de Hoy")
-      st.caption("Cartelera oficial de la jornada")
+      st.caption("Cartelera oficial en tiempo real")
 
       try:
+        # Obtenemos la fecha actual automáticamente
         hoy_str = datetime.today().strftime("%m/%d/%Y")
+        
+        # Consultamos la API oficial para la fecha de hoy
         board = scoreboardv2.ScoreboardV2(game_date=hoy_str)
         headers = board.game_header.get_data_frame()
+        lineups = board.line_score.get_data_frame() if hasattr(board, 'line_score') else None
 
         if not headers.empty:
           for idx, row in headers.iterrows():
-            matchup_text = row.get("GAME_STATUS_TEXT", "Programado")
-            st.markdown(f"🏀 **Juego {idx+1}**")
-            st.write(f"Estado: {matchup_text}")
-            st.markdown("---")
+            game_id = row.get("GAME_ID")
+            status = row.get("GAME_STATUS_TEXT", "Programado")
+            
+            if lineups is not None and not lineups.empty:
+              teams_in_game = lineups[lineups['GAME_ID'] == game_id]
+              if len(teams_in_game) >= 2:
+                vis_team = teams_in_game.iloc[0]['TEAM_NAME']
+                loc_team = teams_in_game.iloc[1]['TEAM_NAME']
+                st.markdown(f"🏀 **{vis_team} vs {loc_team}**")
+                st.caption(f"Estado: {status}")
+                st.markdown("---")
+              else:
+                st.markdown(f"🏀 **Partido {idx+1}**")
+                st.caption(f"Estado: {status}")
+                st.markdown("---")
+            else:
+              st.markdown(f"🏀 **Partido de la Jornada {idx+1}**")
+              st.caption(f"Estado: {status}")
+              st.markdown("---")
         else:
-          st.info(
-              "No hay partidos programados para hoy en la cartelera oficial."
-          )
-      except Exception:
-        st.markdown("🏀 **Lakers vs Warriors**")
-        st.caption("19:30 CST")
-        st.markdown("---")
-        st.markdown("🏀 **Celtics vs Heat**")
-        st.caption("20:00 CST")
-        st.markdown("---")
-        st.markdown("🏀 **Nuggets vs Suns**")
-        st.caption("21:30 CST")
+          # Si hoy no hay partidos en la API (ej. día de descanso o pretemporada)
+          st.info(f"No hay encuentros programados en la cartelera oficial para el día de hoy ({datetime.today().strftime('%d/%m/%Y')}).")
+          st.caption("El sistema se sincronizará automáticamente en la próxima jornada.")
+          
+      except Exception as e:
+        st.warning("Conectando con la cartelera de la NBA...")
 
 else:
   st.error("No se pudieron cargar los datos de la NBA.")
