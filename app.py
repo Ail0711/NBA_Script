@@ -182,7 +182,7 @@ with col_main:
         st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
 
     # --- ANÁLISIS DE VALOR Y MARGEN CON LA CABECERA REPLICADA ---
-    st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
+    st.markdown("### 🎯 Decision Modelo NoCar")
 
     with st.container(border=True):
       col_l_img2, col_vs2, col_v_img2 = st.columns([1, 0.3, 1])
@@ -227,7 +227,7 @@ with col_main:
         st.markdown(f"- Línea del Casino: **{linea_spread_casino:+.1f} pts**")
         
         if abs(margen_spread) >= 4.0:
-          desc_edge_spread = "Desajuste masivo vs Las Vegas"
+          desc_edge_spread = "Desajuste masivo vs el Casino"
         elif abs(margen_spread) >= 2.0:
           desc_edge_spread = "Ventaja sólida detectada (+EV)"
         else:
@@ -252,7 +252,7 @@ with col_main:
             st.success(
                 f"✅ **APUESTA RECOMENDADA:**\n"
                 f"Hándicap a {equipo_local}\n\n"
-                f"**Análisis:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente a Las Vegas."
+                f"**Análisis:** Margen favorable de **+{abs(margen_spread):.2f} pts** frente al Casino."
             )
           else:
             st.success(
