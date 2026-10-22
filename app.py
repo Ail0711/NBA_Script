@@ -84,18 +84,32 @@ calcular = st.sidebar.button(
     "Calcular y Analizar Margen (+EV)", type="primary"
 )
 
+# --- OBTENCIÓN DE IDS Y LOGOS DE LOS EQUIPOS ---
+loc_info = df[df["full_name"] == equipo_local]
+vis_info = df[df["full_name"] == equipo_vis]
+
+loc_id = loc_info["id"].values[0] if not loc_info.empty else None
+vis_id = vis_info["id"].values[0] if not vis_info.empty else None
+
+loc_logo = f"https://cdn.nba.com/logos/nba/{loc_id}/global/L/logo.svg" if loc_id else ""
+vis_logo = f"https://cdn.nba.com/logos/nba/{vis_id}/global/L/logo.svg" if vis_id else ""
+
 # --- DISTRIBUCIÓN PRINCIPAL (LAYOUT) ---
 col_main, col_spacer, col_right = st.columns([2.2, 0.1, 1.1])
 
 with col_main:
-  # Cabecera visual del enfrentamiento
+  # Cabecera visual del enfrentamiento con logos oficiales
   with st.container(border=True):
     col_l_img, col_vs, col_v_img = st.columns([1, 0.4, 1])
     with col_l_img:
+      if loc_logo:
+        st.image(loc_logo, width=70)
       st.markdown(f"### {equipo_local}")
     with col_vs:
-      st.markdown("### VS")
+      st.markdown("<h2 style='text-align: center; padding-top: 20px;'>VS</h2>", unsafe_allow_html=True)
     with col_v_img:
+      if vis_logo:
+        st.image(vis_logo, width=70)
       st.markdown(f"### {equipo_vis}")
 
   if calcular:
@@ -132,7 +146,7 @@ with col_main:
     margen_spread = spread_modelo_loc - linea_spread_casino
     margen_total = total_proyectado - linea_total_casino
 
-    # --- MÉTRICAS PRINCIPALES EN BLOQUE HORIZONTAL (ESTILO NUEVO) ---
+    # --- MÉTRICAS PRINCIPALES EN BLOQUE HORIZONTAL ---
     st.markdown("### 📊 Desglose de Proyecciones del Modelo")
     
     with st.container(border=True):
