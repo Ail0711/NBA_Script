@@ -171,7 +171,7 @@ with col_main:
       with m4:
         st.metric(label="Total Proyectado", value=f"{total_proyectado:.1f}")
 
-    # --- ANÁLISIS DE VALOR Y MARGEN CON LOGOS PARA CAPTURA (CORREGIDO SIN ASTERISCOS) ---
+    # --- ANÁLISIS DE VALOR Y MARGEN CON LOGOS PARA CAPTURA ---
     st.markdown("### 🎯 Comparación y Margen de Valor (+EV)")
 
     with st.container(border=True):
@@ -197,29 +197,31 @@ with col_main:
 
     # --- MÓDULO 1: HÁNDICAP (SPREAD) ---
     with col_mod1:
-      with st.container(border=True, height=380):
+      with st.container(border=True, height=410):
         st.markdown(f"**1. Hándicap (Spread)**")
-        st.write(f"- Línea del Casino: **{linea_spread_casino:+.1f} pts**")
+        st.markdown(f"- Línea del Casino: **{linea_spread_casino:+.1f} pts**")
         
         if abs(margen_spread) >= 4.0:
-          desc_edge_spread = "Desajuste masivo vs Las Vegas (Alta confianza)"
+          desc_edge_spread = "Desajuste masivo vs Las Vegas"
         elif abs(margen_spread) >= 2.0:
-          desc_edge_spread = "Ventaja sólida detectada (+EV viable)"
+          desc_edge_spread = "Ventaja sólida detectada (+EV)"
         else:
-          desc_edge_spread = "Línea ajustada, el casino está acertado"
+          desc_edge_spread = "Línea ajustada, casino acertado"
 
         st.markdown(
-            f"- **Ventaja Modelo (+EV):** `{margen_spread:+.2f} pts`\n"
+            f"- **Ventaja Modelo:** `{margen_spread:+.2f} pts`\n"
             f"  *<small style='color: gray;'>💡 {desc_edge_spread}</small>*",
             unsafe_allow_html=True
         )
+        
+        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
 
         if abs(margen_spread) >= 2.0:
           if linea_spread_casino < 0 and spread_modelo_loc < linea_spread_casino:
             st.success(
                 f"✅ **APUESTA RECOMENDADA:**\n"
                 f"Hándicap a {equipo_local} ({linea_spread_casino:+.1f})\n\n"
-                f"**Análisis:** El modelo proyecta que superarán la línea del casino."
+                f"**Análisis:** Superarán la línea del casino."
             )
           elif margen_spread > 0:
             st.success(
@@ -231,29 +233,31 @@ with col_main:
             st.success(
                 f"✅ **APUESTA RECOMENDADA:**\n"
                 f"Hándicap a {equipo_vis} (Visitante)\n\n"
-                f"**Análisis:** Ventaja detectada del lado visitante con **{abs(margen_spread):.2f} pts**."
+                f"**Análisis:** Ventaja visitante de **{abs(margen_spread):.2f} pts**."
             )
         else:
           st.warning("⚠️ **Línea ajustada:** Sin margen suficiente (< 2 pts).")
 
     # --- MÓDULO 2: PUNTUACIÓN TOTAL (O/U) ---
     with col_mod2:
-      with st.container(border=True, height=380):
+      with st.container(border=True, height=410):
         st.markdown(f"**2. Puntuación Total (O/U)**")
-        st.write(f"- Línea del Casino: **{linea_total_casino:.1f} pts**")
+        st.markdown(f"- Línea del Casino: **{linea_total_casino:.1f} pts**")
         
         if abs(margen_total) >= 5.0:
-          desc_edge_total = "Diferencia notable en ritmo/ofensiva proyectada"
+          desc_edge_total = "Diferencia notable en ritmo proyectado"
         elif abs(margen_total) >= 3.0:
-          desc_edge_total = "Margen aceptable por encima del filtro"
+          desc_edge_total = "Margen aceptable sobre el filtro"
         else:
-          desc_edge_total = "Línea de puntos muy bien estimada por el casino"
+          desc_edge_total = "Línea de puntos muy bien estimada"
 
         st.markdown(
-            f"- **Ventaja Modelo (+EV):** `{margen_total:+.2f} pts`\n"
+            f"- **Ventaja Modelo:** `{margen_total:+.2f} pts`\n"
             f"  *<small style='color: gray;'>💡 {desc_edge_total}</small>*",
             unsafe_allow_html=True
         )
+        
+        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
 
         if abs(margen_total) >= 3.0:
           if margen_total > 0:
